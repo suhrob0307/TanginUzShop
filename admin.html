@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TanginUz Admin Panel</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f6fa; color: #2d3436; }
+
+  /* Login */
+  #login { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #1f6f4a, #2f9466); }
+  .login-box { background: #fff; border-radius: 20px; padding: 40px; width: 360px; box-shadow: 0 20px 60px rgba(0,0,0,.2); }
+  .login-box h1 { font-size: 24px; font-weight: 800; margin-bottom: 6px; }
+  .login-box p { color: #888; font-size: 14px; margin-bottom: 28px; }
+  .login-box input { width: 100%; padding: 14px 16px; border: 1.5px solid #e0e0e0; border-radius: 12px; font-size: 15px; outline: none; margin-bottom: 12px; }
+  .login-box input:focus { border-color: #1f6f4a; }
+  .login-box button { width: 100%; padding: 14px; background: #1f6f4a; color: #fff; border: 0; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; }
+  .err { color: #e74c3c; font-size: 13px; margin-top: 8px; display: none; }
+
+  /* App */
+  #app { display: none; }
+  .sidebar { width: 240px; background: #fff; min-height: 100vh; position: fixed; top: 0; left: 0; border-right: 1px solid #eee; padding: 24px 0; }
+  .sidebar .logo { padding: 0 24px 24px; border-bottom: 1px solid #eee; margin-bottom: 16px; }
+  .sidebar .logo h2 { font-size: 18px; font-weight: 800; color: #1f6f4a; }
+  .sidebar .logo p { font-size: 12px; color: #888; }
+  .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 24px; cursor: pointer; color: #666; font-size: 14px; font-weight: 600; transition: .15s; border-left: 3px solid transparent; }
+  .nav-item:hover { background: #f5f6fa; color: #1f6f4a; }
+  .nav-item.active { background: #e6f4ec; color: #1f6f4a; border-left-color: #1f6f4a; }
+  .nav-item .icon { font-size: 18px; }
+  .main { margin-left: 240px; padding: 32px; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* Header */
+  .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+  .page-header h1 { font-size: 24px; font-weight: 800; }
+  .btn { padding: 10px 20px; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; border: 0; transition: .15s; }
+  .btn-primary { background: #1f6f4a; color: #fff; }
+  .btn-primary:hover { background: #186040; }
+  .btn-danger { background: #e74c3c; color: #fff; }
+  .btn-sm { padding: 7px 14px; font-size: 13px; border-radius: 8px; }
+  .btn-outline { background: transparent; border: 1.5px solid #ddd; color: #666; }
+  .btn-outline:hover { border-color: #1f6f4a; color: #1f6f4a; }
+
+  /* Stats */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+  .stat { background: #fff; border-radius: 14px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+  .stat .label { font-size: 12px; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+  .stat .val { font-size: 32px; font-weight: 800; margin-top: 6px; color: #1f6f4a; }
+
+  /* Table */
+  .card { background: #fff; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,.06); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  th { padding: 14px 16px; text-align: left; font-size: 12px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid #f0f0f0; background: #fafafa; }
+  td { padding: 14px 16px; font-size: 14px; border-bottom: 1px solid #f9f9f9; vertical-align: middle; }
+  tr:last-child td { border-bottom: 0; }
+  tr:hover td { background: #fafffe; }
+  .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+  .badge-green { background: #e6f4ec; color: #1f6f4a; }
+  .badge-red { background: #fae8e8; color: #c0392b; }
+  .badge-blue { background: #e8f0fe; color: #2563eb; }
+  .badge-orange { background: #fff3e0; color: #e67e22; }
+  .badge-gray { background: #f0f0f0; color: #666; }
+
+  /* Modal */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 100; display: flex; align-items: center; justify-content: center; display: none; }
+  .modal-overlay.show { display: flex; }
+  .modal { background: #fff; border-radius: 20px; padding: 32px; width: 520px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.2); }
+  .modal h2 { font-size: 20px; font-weight: 800; margin-bottom: 24px; }
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 13px; font-weight: 700; color: #555; margin-bottom: 6px; }
+  .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px 14px; border: 1.5px solid #e0e0e0; border-radius: 10px; font-size: 14px; font-family: inherit; outline: none; }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #1f6f4a; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+  .photo-preview { width: 80px; height: 80px; border-radius: 10px; object-fit: cover; margin-top: 8px; display: none; }
+  .upload-area { border: 2px dashed #ddd; border-radius: 10px; padding: 20px; text-align: center; cursor: pointer; color: #888; font-size: 13px; }
+  .upload-area:hover { border-color: #1f6f4a; color: #1f6f4a; }
+
+  /* Misc */
+  .empty { text-align: center; padding: 40px; color: #aaa; }
+  .loading { text-align: center; padding: 40px; color: #888; }
+  .prod-img { width: 42px; height: 42px; border-radius: 8px; object-fit: cover; background: #f0f0f0; }
+  .prod-img-placeholder { width: 42px; height: 42px; border-radius: 8px; background: linear-gradient(135deg, #1f6f4a, #2f9466); display: inline-flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; }
+  select { appearance: auto; }
+  .toggle { display: flex; align-items: center; gap: 10px; }
+  .toggle input[type=checkbox] { width: 18px; height: 18px; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="login-box">
+    <h1>TanginUz 🛍️</h1>
+    <p>Admin Panel — kirish</p>
+    <input type="password" id="pw" placeholder="Parol" onkeydown="if(event.key==='Enter')doLogin()">
+    <button onclick="doLogin()">Kirish</button>
+    <div class="err" id="loginErr">Parol noto'g'ri!</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="sidebar">
+    <div class="logo">
+      <h2>TanginUz</h2>
+      <p>Admin Panel</p>
+    </div>
+    <div class="nav-item active" onclick="showPage('dashboard')"><span class="icon">📊</span> Dashboard</div>
+    <div class="nav-item" onclick="showPage('categories')"><span class="icon">🗂️</span> Kategoriyalar</div>
+    <div class="nav-item" onclick="showPage('products')"><span class="icon">📦</span> Mahsulotlar</div>
+    <div class="nav-item" onclick="showPage('orders')"><span class="icon">🛒</span> Buyurtmalar</div>
+    <div class="nav-item" style="margin-top:auto; position:absolute; bottom:24px; left:0; width:240px;" onclick="logout()"><span class="icon">🚪</span> Chiqish</div>
+  </div>
+
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header"><h1>Dashboard</h1></div>
+      <div class="stats">
+        <div class="stat"><div class="label">Kategoriyalar</div><div class="val" id="stat-cats">-</div></div>
+        <div class="stat"><div class="label">Mahsulotlar</div><div class="val" id="stat-prods">-</div></div>
+        <div class="stat"><div class="label">Buyurtmalar</div><div class="val" id="stat-orders">-</div></div>
+        <div class="stat"><div class="label">Yangi</div><div class="val" id="stat-new">-</div></div>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Oxirgi buyurtmalar</th><th>Mijoz</th><th>Jami ₩</th><th>Status</th></tr></thead>
+          <tbody id="recent-orders"><tr><td colspan="4" class="loading">Yuklanmoqda...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CATEGORIES -->
+    <div class="page" id="page-categories">
+      <div class="page-header">
+        <h1>Kategoriyalar</h1>
+        <button class="btn btn-primary" onclick="openCatModal()">+ Yangi kategoriya</button>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Emoji</th><th>Nomi (UZ)</th><th>Nomi (RU)</th><th>Nomi (EN)</th><th>Tartib</th><th>Amallar</th></tr></thead>
+          <tbody id="cats-table"><tr><td colspan="6" class="loading">Yuklanmoqda...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PRODUCTS -->
+    <div class="page" id="page-products">
+      <div class="page-header">
+        <h1>Mahsulotlar</h1>
+        <button class="btn btn-primary" onclick="openProdModal()">+ Yangi mahsulot</button>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Rasm</th><th>Nomi</th><th>Brend</th><th>Kategoriya</th><th>Narx ₩</th><th>Narx so'm</th><th>Miqdor</th><th>Status</th><th>Amallar</th></tr></thead>
+          <tbody id="prods-table"><tr><td colspan="9" class="loading">Yuklanmoqda...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ORDERS -->
+    <div class="page" id="page-orders">
+      <div class="page-header"><h1>Buyurtmalar</h1></div>
+      <div class="card">
+        <table>
+          <thead><tr><th>#</th><th>Mijoz</th><th>Mahsulotlar</th><th>Jami ₩</th><th>Jami so'm</th><th>Status</th><th>Sana</th><th>Amallar</th></tr></thead>
+          <tbody id="orders-table"><tr><td colspan="8" class="loading">Yuklanmoqda...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CATEGORY MODAL -->
+<div class="modal-overlay" id="catModal">
+  <div class="modal">
+    <h2 id="catModalTitle">Yangi kategoriya</h2>
+    <input type="hidden" id="catId">
+    <div class="form-group"><label>Emoji</label><input id="catEmoji" placeholder="Masalan: 💊 yoki 💄"></div>
+    <div class="form-group"><label>Nomi (O'zbek) *</label><input id="catUz" placeholder="Masalan: Vitaminlar"></div>
+    <div class="form-group"><label>Nomi (Rus)</label><input id="catRu" placeholder="Масalan: Витамины"></div>
+    <div class="form-group"><label>Nomi (Ingliz)</label><input id="catEn" placeholder="Example: Vitamins"></div>
+    <div class="form-group"><label>Tartib raqami</label><input id="catOrder" type="number" value="0"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeCatModal()">Bekor</button>
+      <button class="btn btn-primary" onclick="saveCat()">Saqlash</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCT MODAL -->
+<div class="modal-overlay" id="prodModal">
+  <div class="modal">
+    <h2 id="prodModalTitle">Yangi mahsulot</h2>
+    <input type="hidden" id="prodId">
+    <div class="form-group"><label>Nomi *</label><input id="prodName" placeholder="Masalan: Omega-3 Fish Oil"></div>
+    <div class="form-group"><label>Brend</label><input id="prodBrand" placeholder="Masalan: NOW Foods"></div>
+    <div class="form-group"><label>Kategoriya *</label><select id="prodCat"><option value="">Tanlang...</option></select></div>
+    <div class="form-row">
+      <div class="form-group"><label>Narx (₩) *</label><input id="prodWon" type="number" placeholder="13000"></div>
+      <div class="form-group"><label>Narx (so'm) *</label><input id="prodSom" type="number" placeholder="100750"></div>
+    </div>
+    <div class="form-group"><label>Miqdor (dona)</label><input id="prodQty" type="number" placeholder="10" value="0"></div>
+    <div class="form-group"><label>Tavsif</label><textarea id="prodDesc" rows="3" placeholder="Mahsulot haqida qisqa ma'lumot..."></textarea></div>
+    <div class="form-group">
+      <label>Rasm</label>
+      <div class="upload-area" onclick="document.getElementById('photoFile').click()">📷 Rasmni tanlash uchun bosing</div>
+      <input type="file" id="photoFile" accept="image/*" style="display:none" onchange="previewPhoto(this)">
+      <img id="photoPreview" class="photo-preview">
+      <input type="hidden" id="prodPhoto">
+    </div>
+    <div class="form-group toggle">
+      <input type="checkbox" id="prodStock" checked>
+      <label for="prodStock">Mavjud (stokda bor)</label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeProdModal()">Bekor</button>
+      <button class="btn btn-primary" onclick="saveProd()">Saqlash</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// CONFIG — Replace with your actual Supabase credentials
+// ============================================================
+const SUPABASE_URL = 'https://giggypnwidjnpusyonoo.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_-nSUhJj2p45Xm3V0Kqr-Rw_Ym1h0uBL';
+const ADMIN_PASSWORD = 'tanginuz2024'; // Change this!
+
+// ============================================================
+// HELPERS
+// ============================================================
+const api = async (table, opts = {}) => {
+  const { method = 'GET', body, params = '', select = '*' } = opts;
+  const url = `${SUPABASE_URL}/rest/v1/${table}?select=${select}${params}`;
+  const res = await fetch(url, {
+    method,
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': method === 'POST' ? 'return=representation' : 'return=minimal',
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (!res.ok) { const e = await res.text(); throw new Error(e); }
+  if (method === 'GET') return res.json();
+  if (method === 'POST') return res.json();
+  return true;
+};
+
+const del = async (table, id) => {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+    method: 'DELETE',
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` },
+  });
+  return res.ok;
+};
+
+const patch = async (table, id, body) => {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+    method: 'PATCH',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+  return res.ok;
+};
+
+const fmt = n => n?.toLocaleString('ru-RU') || '0';
+const statusBadge = s => {
+  const map = { new: ['Yangi','badge-blue'], accepted: ['Qabul','badge-green'], shipping: ['Yolda','badge-orange'], delivered: ['Yetdi','badge-green'], cancelled: ['Bekor','badge-red'] };
+  const [label, cls] = map[s] || ['Noma\'lum','badge-gray'];
+  return `<span class="badge ${cls}">${label}</span>`;
+};
+
+// ============================================================
+// LOGIN
+// ============================================================
+function doLogin() {
+  const pw = document.getElementById('pw').value;
+  if (pw === ADMIN_PASSWORD) {
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    loadDashboard();
+  } else {
+    document.getElementById('loginErr').style.display = 'block';
+  }
+}
+function logout() {
+  document.getElementById('login').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('pw').value = '';
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if (name === 'dashboard') loadDashboard();
+  if (name === 'categories') loadCategories();
+  if (name === 'products') loadProducts();
+  if (name === 'orders') loadOrders();
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+async function loadDashboard() {
+  try {
+    const [cats, prods, orders] = await Promise.all([
+      api('categories', { select: 'id' }),
+      api('products', { select: 'id' }),
+      api('orders', { select: 'id,status,first_name,username,total_won,created_at', params: '&order=created_at.desc&limit=10' }),
+    ]);
+    document.getElementById('stat-cats').textContent = cats.length;
+    document.getElementById('stat-prods').textContent = prods.length;
+    document.getElementById('stat-orders').textContent = orders.length;
+    document.getElementById('stat-new').textContent = orders.filter(o => o.status === 'new').length;
+    const tbody = document.getElementById('recent-orders');
+    if (!orders.length) { tbody.innerHTML = '<tr><td colspan="4" class="empty">Hali buyurtma yoq</td></tr>'; return; }
+    tbody.innerHTML = orders.slice(0,5).map(o =>
+      `<tr><td>#${o.id}</td><td>${o.first_name || ''} @${o.username || '-'}</td><td>${fmt(o.total_won)} ₩</td><td>${statusBadge(o.status)}</td></tr>`
+    ).join('');
+  } catch (e) { console.error(e); }
+}
+
+// ============================================================
+// CATEGORIES
+// ============================================================
+let cats = [];
+async function loadCategories() {
+  const tbody = document.getElementById('cats-table');
+  try {
+    cats = await api('categories', { params: '&order=sort_order.asc' });
+    if (!cats.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty">Hali kategoriya yoq</td></tr>'; return; }
+    tbody.innerHTML = cats.map(c => `
+      <tr>
+        <td style="font-size:22px">${c.emoji || '📦'}</td>
+        <td><strong>${c.name_uz}</strong></td>
+        <td>${c.name_ru || '-'}</td>
+        <td>${c.name_en || '-'}</td>
+        <td>${c.sort_order}</td>
+        <td>
+          <button class="btn btn-sm btn-outline" onclick="editCat(${c.id})">✏️</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteCat(${c.id})" style="margin-left:6px">🗑️</button>
+        </td>
+      </tr>`).join('');
+  } catch (e) { tbody.innerHTML = `<tr><td colspan="6" class="empty">Xato: ${e.message}</td></tr>`; }
+}
+
+function openCatModal(cat = null) {
+  document.getElementById('catId').value = cat ? cat.id : '';
+  document.getElementById('catModalTitle').textContent = cat ? 'Kategoriyani tahrirlash' : 'Yangi kategoriya';
+  document.getElementById('catEmoji').value = cat?.emoji || '';
+  document.getElementById('catUz').value = cat?.name_uz || '';
+  document.getElementById('catRu').value = cat?.name_ru || '';
+  document.getElementById('catEn').value = cat?.name_en || '';
+  document.getElementById('catOrder').value = cat?.sort_order || 0;
+  document.getElementById('catModal').classList.add('show');
+}
+function closeCatModal() { document.getElementById('catModal').classList.remove('show'); }
+function editCat(id) { openCatModal(cats.find(c => c.id === id)); }
+
+async function saveCat() {
+  const id = document.getElementById('catId').value;
+  const data = {
+    emoji: document.getElementById('catEmoji').value || '📦',
+    name_uz: document.getElementById('catUz').value.trim(),
+    name_ru: document.getElementById('catRu').value.trim(),
+    name_en: document.getElementById('catEn').value.trim(),
+    sort_order: parseInt(document.getElementById('catOrder').value) || 0,
+  };
+  if (!data.name_uz) { alert('Nomi (O\'zbek) majburiy!'); return; }
+  try {
+    if (id) await patch('categories', id, data);
+    else await api('categories', { method: 'POST', body: data });
+    closeCatModal();
+    loadCategories();
+  } catch (e) { alert('Xato: ' + e.message); }
+}
+
+async function deleteCat(id) {
+  if (!confirm('Bu kategoriyani o\'chirasizmi?')) return;
+  await del('categories', id);
+  loadCategories();
+}
+
+// ============================================================
+// PRODUCTS
+// ============================================================
+let prods = [];
+async function loadProducts() {
+  const tbody = document.getElementById('prods-table');
+  try {
+    prods = await api('products', { select: '*,categories(name_uz)', params: '&order=created_at.desc' });
+    if (!prods.length) { tbody.innerHTML = '<tr><td colspan="9" class="empty">Hali mahsulot yoq</td></tr>'; return; }
+    tbody.innerHTML = prods.map(p => `
+      <tr>
+        <td>${p.photo_url ? `<img src="${p.photo_url}" class="prod-img">` : `<div class="prod-img-placeholder">📦</div>`}</td>
+        <td><strong>${p.name}</strong></td>
+        <td>${p.brand || '-'}</td>
+        <td>${p.categories?.name_uz || '-'}</td>
+        <td>${fmt(p.price_won)} ₩</td>
+        <td>${fmt(p.price_som)} so'm</td>
+        <td>${p.quantity}</td>
+        <td><span class="badge ${p.in_stock ? 'badge-green' : 'badge-red'}">${p.in_stock ? 'Mavjud' : 'Tugagan'}</span></td>
+        <td>
+          <button class="btn btn-sm btn-outline" onclick="editProd(${p.id})">✏️</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteProd(${p.id})" style="margin-left:6px">🗑️</button>
+        </td>
+      </tr>`).join('');
+  } catch (e) { tbody.innerHTML = `<tr><td colspan="9" class="empty">Xato: ${e.message}</td></tr>`; }
+}
+
+async function openProdModal(prod = null) {
+  // Load categories for select
+  if (!cats.length) cats = await api('categories', { params: '&order=sort_order.asc' });
+  const sel = document.getElementById('prodCat');
+  sel.innerHTML = '<option value="">Tanlang...</option>' + cats.map(c => `<option value="${c.id}" ${prod?.category_id === c.id ? 'selected' : ''}>${c.emoji || ''} ${c.name_uz}</option>`).join('');
+
+  document.getElementById('prodId').value = prod ? prod.id : '';
+  document.getElementById('prodModalTitle').textContent = prod ? 'Mahsulotni tahrirlash' : 'Yangi mahsulot';
+  document.getElementById('prodName').value = prod?.name || '';
+  document.getElementById('prodBrand').value = prod?.brand || '';
+  document.getElementById('prodWon').value = prod?.price_won || '';
+  document.getElementById('prodSom').value = prod?.price_som || '';
+  document.getElementById('prodQty').value = prod?.quantity || 0;
+  document.getElementById('prodDesc').value = prod?.description || '';
+  document.getElementById('prodStock').checked = prod ? prod.in_stock : true;
+  document.getElementById('prodPhoto').value = prod?.photo_url || '';
+  const preview = document.getElementById('photoPreview');
+  if (prod?.photo_url) { preview.src = prod.photo_url; preview.style.display = 'block'; }
+  else { preview.style.display = 'none'; }
+  document.getElementById('prodModal').classList.add('show');
+}
+function closeProdModal() { document.getElementById('prodModal').classList.remove('show'); }
+function editProd(id) { openProdModal(prods.find(p => p.id === id)); }
+
+async function previewPhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  // Upload to Supabase storage
+  const filename = Date.now() + '_' + file.name.replace(/\s/g,'_');
+  const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/product-photos/${filename}`, {
+    method: 'POST',
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': file.type },
+    body: file,
+  });
+  if (uploadRes.ok) {
+    const photoUrl = `${SUPABASE_URL}/storage/v1/object/public/product-photos/${filename}`;
+    document.getElementById('prodPhoto').value = photoUrl;
+    const preview = document.getElementById('photoPreview');
+    preview.src = photoUrl; preview.style.display = 'block';
+  } else {
+    alert('Rasm yuklashda xato! Qayta urinib koring.');
+  }
+}
+
+async function saveProd() {
+  const id = document.getElementById('prodId').value;
+  const data = {
+    name: document.getElementById('prodName').value.trim(),
+    brand: document.getElementById('prodBrand').value.trim(),
+    category_id: document.getElementById('prodCat').value || null,
+    price_won: parseInt(document.getElementById('prodWon').value) || 0,
+    price_som: parseInt(document.getElementById('prodSom').value) || 0,
+    quantity: parseInt(document.getElementById('prodQty').value) || 0,
+    description: document.getElementById('prodDesc').value.trim(),
+    photo_url: document.getElementById('prodPhoto').value || null,
+    in_stock: document.getElementById('prodStock').checked,
+  };
+  if (!data.name) { alert('Nomi majburiy!'); return; }
+  try {
+    if (id) await patch('products', id, data);
+    else await api('products', { method: 'POST', body: data });
+    closeProdModal();
+    loadProducts();
+  } catch (e) { alert('Xato: ' + e.message); }
+}
+
+async function deleteProd(id) {
+  if (!confirm('Bu mahsulotni o\'chirasizmi?')) return;
+  await del('products', id);
+  loadProducts();
+}
+
+// ============================================================
+// ORDERS
+// ============================================================
+async function loadOrders() {
+  const tbody = document.getElementById('orders-table');
+  try {
+    const orders = await api('orders', { params: '&order=created_at.desc' });
+    if (!orders.length) { tbody.innerHTML = '<tr><td colspan="8" class="empty">Hali buyurtma yoq</td></tr>'; return; }
+    tbody.innerHTML = orders.map(o => {
+      const items = (o.items || []).map(i => `${i.name} x${i.qty}`).join(', ');
+      const date = new Date(o.created_at).toLocaleDateString('uz');
+      return `<tr>
+        <td>#${o.id}</td>
+        <td>${o.first_name || ''}<br><small style="color:#888">@${o.username || '-'}</small></td>
+        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${items}">${items}</td>
+        <td>${fmt(o.total_won)} ₩</td>
+        <td>${fmt(o.total_som)} so'm</td>
+        <td>${statusBadge(o.status)}</td>
+        <td>${date}</td>
+        <td>
+          <select onchange="updateOrderStatus(${o.id}, this.value)" style="padding:6px 10px;border-radius:8px;border:1px solid #ddd;font-size:13px;cursor:pointer">
+            <option value="new" ${o.status==='new'?'selected':''}>Yangi</option>
+            <option value="accepted" ${o.status==='accepted'?'selected':''}>Qabul</option>
+            <option value="shipping" ${o.status==='shipping'?'selected':''}>Yolda</option>
+            <option value="delivered" ${o.status==='delivered'?'selected':''}>Yetdi</option>
+            <option value="cancelled" ${o.status==='cancelled'?'selected':''}>Bekor</option>
+          </select>
+        </td>
+      </tr>`;
+    }).join('');
+  } catch (e) { tbody.innerHTML = `<tr><td colspan="8" class="empty">Xato: ${e.message}</td></tr>`; }
+}
+
+async function updateOrderStatus(id, status) {
+  await patch('orders', id, { status });
+  loadDashboard();
+}
+</script>
+</body>
+</html>

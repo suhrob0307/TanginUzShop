@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TanginUz Do'kon</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f5f7; --card: #ffffff; --ink: #14181f; --muted: #8a8f99;
+    --line: #ececef; --accent: #1f6f4a; --accent-soft: #e6f4ec;
+    --dark: #14181f; --radius: 18px; --shadow: 0 6px 22px rgba(20,24,31,.06);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: 'Manrope', sans-serif; background: var(--bg); color: var(--ink); padding-bottom: 110px; }
+
+  .topbar { position: sticky; top: 0; z-index: 30; background: var(--card); border-bottom: 1px solid var(--line); padding: 14px 16px 10px; }
+  .brand { text-align: center; font-weight: 800; font-size: 19px; margin: 0 0 12px; }
+  .brand span { color: var(--accent); }
+  .search { display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 11px 14px; }
+  .search svg { width: 18px; height: 18px; flex: none; opacity: .5; }
+  .search input { border: 0; outline: 0; background: transparent; width: 100%; font-family: inherit; font-size: 15px; color: var(--ink); }
+
+  .cats { display: flex; gap: 8px; overflow-x: auto; padding: 12px 16px 4px; scrollbar-width: none; }
+  .cats::-webkit-scrollbar { display: none; }
+  .pill { flex: none; border: 1px solid var(--line); background: var(--card); color: var(--ink); padding: 9px 18px; border-radius: 999px; font-size: 14px; font-weight: 600; cursor: pointer; transition: .15s; white-space: nowrap; }
+  .pill.active { background: var(--dark); color: #fff; border-color: var(--dark); }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 14px 16px; }
+  .card { background: var(--card); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; animation: rise .4s both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px);} to {opacity:1; transform:none;} }
+  .thumb { aspect-ratio: 1/1; background: linear-gradient(135deg,#fafbfc,#eef0f3); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .thumb .ph { width: 64px; height: 84px; border-radius: 10px; background: linear-gradient(160deg,var(--accent),#2f9466); display:flex; align-items:center; justify-content:center; color:#fff; font-size: 28px; box-shadow: 0 8px 18px rgba(31,111,74,.28); }
+  .body { padding: 11px 12px 13px; display: flex; flex-direction: column; gap: 3px; flex: 1; }
+  .b-brand { font-size: 10.5px; font-weight: 700; letter-spacing: .6px; color: var(--muted); text-transform: uppercase; }
+  .b-name { font-size: 14px; font-weight: 700; line-height: 1.25; margin: 1px 0 2px; }
+  .b-won { font-size: 16px; font-weight: 800; }
+  .b-won small { font-size: 12px; font-weight: 700; }
+  .b-som { font-size: 12px; color: var(--muted); font-weight: 600; margin-top: -1px; }
+  .stock { align-self: flex-start; margin-top: 4px; font-size: 11px; font-weight: 700; color: var(--accent); background: var(--accent-soft); padding: 3px 9px; border-radius: 999px; }
+  .stock.out { color: #b23b3b; background: #fae8e8; }
+  .add { margin-top: 9px; border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 11px; padding: 10px; font-family: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer; transition: .15s; }
+  .add:active { transform: scale(.97); }
+  .add.in { background: var(--dark); color: #fff; border-color: var(--dark); }
+  .add:disabled { opacity: .4; cursor: default; }
+
+  .cartbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: linear-gradient(to top, var(--card) 70%, rgba(255,255,255,0)); transform: translateY(120%); transition: transform .28s cubic-bezier(.2,.8,.2,1); }
+  .cartbar.show { transform: none; }
+  .cartbtn { width: 100%; background: var(--dark); color: #fff; border: 0; border-radius: 15px; padding: 15px 18px; font-family: inherit; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-shadow: 0 10px 30px rgba(20,24,31,.12); }
+  .cartbtn .count { background: rgba(255,255,255,.2); border-radius: 999px; padding: 2px 9px; font-size: 13px; margin-left: 8px; }
+
+  .overlay { position: fixed; inset: 0; z-index: 50; background: rgba(20,24,31,.45); opacity: 0; pointer-events: none; transition: .25s; }
+  .overlay.show { opacity: 1; pointer-events: auto; }
+  .sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; background: var(--card); border-radius: 22px 22px 0 0; padding: 18px 18px calc(18px + env(safe-area-inset-bottom)); transform: translateY(110%); transition: transform .3s cubic-bezier(.2,.8,.2,1); max-height: 82vh; overflow-y: auto; }
+  .sheet.show { transform: none; }
+  .sheet h2 { margin: 2px 0 14px; font-size: 19px; font-weight: 800; }
+  .row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .row .nm { flex: 1; font-size: 14px; font-weight: 600; line-height: 1.3; }
+  .row .pr { font-size: 14px; font-weight: 800; white-space: nowrap; }
+  .qty { display: flex; align-items: center; gap: 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .qty button { width: 30px; height: 30px; border: 0; background: var(--bg); font-size: 17px; font-weight: 700; cursor: pointer; color: var(--ink); }
+  .qty span { width: 30px; text-align: center; font-size: 14px; font-weight: 700; }
+  .total { display: flex; justify-content: space-between; align-items: baseline; margin: 16px 0 14px; }
+  .total b { font-size: 21px; font-weight: 800; }
+  .t-som { font-size: 13px; color: var(--muted); font-weight: 600; }
+  .send { width: 100%; border: 0; border-radius: 15px; background: var(--accent); color: #fff; padding: 16px; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer; }
+  .close-btn { width: 100%; background: var(--bg); border: 0; border-radius: 13px; padding: 13px; margin-top: 9px; font-family: inherit; font-weight: 700; font-size: 14px; cursor: pointer; color: var(--ink); }
+  .note { font-size: 11.5px; color: var(--muted); text-align: center; margin-top: 10px; line-height: 1.4; }
+  .empty { text-align: center; color: var(--muted); padding: 30px 0 12px; font-weight: 600; }
+  .loading-screen { display: flex; align-items: center; justify-content: center; min-height: 60vh; color: var(--muted); font-size: 15px; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">TanginUz <span>Do'kon</span> 🛍️</div>
+  <div class="search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+    <input id="q" placeholder="Mahsulot qidirish...">
+  </div>
+</div>
+
+<div class="cats" id="cats"><div style="padding:8px;color:#aaa">Yuklanmoqda...</div></div>
+<div class="grid" id="grid"><div class="loading-screen">Mahsulotlar yuklanmoqda... ⏳</div></div>
+
+<div class="cartbar" id="cartbar">
+  <button class="cartbtn" onclick="openCart()">
+    <span>Savatni ko'rish <span class="count" id="cnt">0</span></span>
+    <span id="bartotal">0 ₩</span>
+  </button>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeCart()"></div>
+<div class="sheet" id="sheet">
+  <h2>Savat</h2>
+  <div id="cartitems"></div>
+  <div class="total" id="totalrow" style="display:none">
+    <span>Jami:</span>
+    <span style="text-align:right">
+      <b id="t-won">0 ₩</b><br>
+      <span class="t-som" id="t-som">0 so'm</span>
+    </span>
+  </div>
+  <button class="send" id="sendbtn" onclick="sendOrder()" style="display:none">Sotuvchiga yuborish</button>
+  <button class="close-btn" onclick="closeCart()">Yopish</button>
+  <div class="note">Buyurtma @tangin_admin ga yuboriladi.</div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://giggypnwidjnpusyonoo.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_-nSUhJj2p45Xm3V0Kqr-Rw_Ym1h0uBL';
+
+const tg = window.Telegram?.WebApp;
+if (tg) { tg.ready(); tg.expand(); }
+
+let allProducts = [];
+let allCategories = [];
+let activeCat = 'all';
+let searchQuery = '';
+const cart = {};
+
+async function fetchData(table, params = '') {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`, {
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+  });
+  return res.json();
+}
+
+function fmt(n) { return (n || 0).toLocaleString('ru-RU'); }
+
+async function init() {
+  try {
+    const [cats, prods] = await Promise.all([
+      fetchData('categories', 'order=sort_order.asc'),
+      fetchData('products', 'order=created_at.desc&select=*,categories(name_uz,emoji)')
+    ]);
+    allCategories = cats;
+    allProducts = prods;
+    renderCats();
+    renderGrid();
+  } catch (e) {
+    document.getElementById('grid').innerHTML = '<div class="loading-screen">Xato yuz berdi. Sahifani yangilang.</div>';
+  }
+}
+
+function renderCats() {
+  const box = document.getElementById('cats');
+  const all = [{ id: 'all', emoji: '🛍️', name_uz: 'Barchasi' }, ...allCategories];
+  box.innerHTML = all.map(c =>
+    `<button class="pill ${c.id === activeCat || c.id == activeCat ? 'active' : ''}" onclick="setCat('${c.id}')">${c.emoji || ''} ${c.name_uz}</button>`
+  ).join('');
+}
+
+function setCat(id) {
+  activeCat = id;
+  renderCats();
+  renderGrid();
+}
+
+function renderGrid() {
+  const list = allProducts.filter(p => {
+    const okCat = activeCat === 'all' || p.category_id == activeCat;
+    const okSearch = !searchQuery || (p.name + ' ' + (p.brand || '')).toLowerCase().includes(searchQuery);
+    return okCat && okSearch;
+  });
+
+  const box = document.getElementById('grid');
+  if (!list.length) {
+    box.innerHTML = '<div style="grid-column:1/3;text-align:center;padding:40px;color:#aaa;font-weight:600">Mahsulot topilmadi</div>';
+    return;
+  }
+  box.innerHTML = list.map((p, i) => `
+    <div class="card" style="animation-delay:${i * 0.03}s">
+      <div class="thumb">
+        ${p.photo_url
+          ? `<img src="${p.photo_url}" alt="${p.name}" loading="lazy">`
+          : `<div class="ph">${p.categories?.emoji || '📦'}</div>`}
+      </div>
+      <div class="body">
+        <div class="b-brand">${p.brand || p.categories?.name_uz || ''}</div>
+        <div class="b-name">${p.name}</div>
+        <div class="b-won">${fmt(p.price_won)} <small>₩</small></div>
+        <div class="b-som">${fmt(p.price_som)} so'm</div>
+        <div class="stock ${p.in_stock ? '' : 'out'}">${p.in_stock ? 'Mavjud' : 'Tugagan'}</div>
+        ${p.in_stock
+          ? `<button class="add ${cart[p.id] ? 'in' : ''}" onclick="addToCart(${p.id})">${cart[p.id] ? 'Savatda · ' + cart[p.id] : "Savatga qo'shish"}</button>`
+          : `<button class="add" disabled>Mavjud emas</button>`}
+      </div>
+    </div>`).join('');
+}
+
+function addToCart(id) {
+  cart[id] = (cart[id] || 0) + 1;
+  updateBar();
+  renderGrid();
+  if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+}
+
+function changeQty(id, d) {
+  cart[id] = (cart[id] || 0) + d;
+  if (cart[id] <= 0) delete cart[id];
+  updateBar();
+  renderCartItems();
+  renderGrid();
+}
+
+function cartCount() { return Object.values(cart).reduce((a, b) => a + b, 0); }
+function cartWon() { return Object.entries(cart).reduce((s, [id, q]) => s + (prod(id)?.price_won || 0) * q, 0); }
+function cartSom() { return Object.entries(cart).reduce((s, [id, q]) => s + (prod(id)?.price_som || 0) * q, 0); }
+function prod(id) { return allProducts.find(p => p.id == id); }
+
+function updateBar() {
+  const c = cartCount();
+  document.getElementById('cnt').textContent = c;
+  document.getElementById('bartotal').textContent = fmt(cartWon()) + ' ₩';
+  document.getElementById('cartbar').classList.toggle('show', c > 0);
+}
+
+function openCart() {
+  renderCartItems();
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('sheet').classList.add('show');
+}
+
+function closeCart() {
+  document.getElementById('overlay').classList.remove('show');
+  document.getElementById('sheet').classList.remove('show');
+}
+
+function renderCartItems() {
+  const ids = Object.keys(cart);
+  const box = document.getElementById('cartitems');
+  const totalRow = document.getElementById('totalrow');
+  const sendBtn = document.getElementById('sendbtn');
+  if (!ids.length) {
+    box.innerHTML = '<div class="empty">Savat bo\'sh</div>';
+    totalRow.style.display = 'none';
+    sendBtn.style.display = 'none';
+    return;
+  }
+  totalRow.style.display = 'flex';
+  sendBtn.style.display = 'block';
+  box.innerHTML = ids.map(id => {
+    const p = prod(id), q = cart[id];
+    if (!p) return '';
+    return `<div class="row">
+      <div class="nm">${p.name}<br><span style="color:var(--muted);font-size:12px">${fmt(p.price_won)} ₩</span></div>
+      <div class="qty">
+        <button onclick="changeQty(${id},-1)">−</button>
+        <span>${q}</span>
+        <button onclick="changeQty(${id},1)">+</button>
+      </div>
+      <div class="pr">${fmt(p.price_won * q)} ₩</div>
+    </div>`;
+  }).join('');
+  document.getElementById('t-won').textContent = fmt(cartWon()) + ' ₩';
+  document.getElementById('t-som').textContent = fmt(cartSom()) + " so'm";
+}
+
+function sendOrder() {
+  const order = {
+    type: 'shop_order',
+    items: Object.entries(cart).map(([id, q]) => {
+      const p = prod(id);
+      return { id: Number(id), name: p.name, brand: p.brand, qty: q, price_won: p.price_won, price_som: p.price_som };
+    }),
+    total_won: cartWon(),
+    total_som: cartSom(),
+  };
+  if (tg?.sendData) {
+    tg.sendData(JSON.stringify(order));
+  } else {
+    alert('Buyurtma (demo):\n\n' + order.items.map(i => `${i.name} x${i.qty}`).join('\n') + `\n\nJami: ${fmt(order.total_won)} ₩`);
+  }
+}
+
+document.getElementById('q').addEventListener('input', e => {
+  searchQuery = e.target.value.toLowerCase().trim();
+  renderGrid();
+});
+
+init();
+</script>
+</body>
+</html>
