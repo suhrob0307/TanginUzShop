@@ -216,7 +216,7 @@
     </div>
     <div class="form-group toggle">
       <input type="checkbox" id="prodStock" checked>
-      <label for="prodStock">Mavjud (stokda bor)</label>
+      <label for="prodStock">Mavjud (stokda bor)</label><div class="form-group" style="margin-top:12px"><label>Badge</label><select id="prodBadge" style="width:100%;padding:12px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:14px"><option value="">Yoq</option><option value="new">Yangi</option><option value="sale">Chegirma</option><option value="hot">Ommabop</option></select></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeProdModal()">Bekor</button>
@@ -440,7 +440,7 @@ async function openProdModal(prod = null) {
   document.getElementById('prodSom').value = prod?.price_som || '';
   document.getElementById('prodQty').value = prod?.quantity || 0;
   document.getElementById('prodDesc').value = prod?.description || '';
-  document.getElementById('prodStock').checked = prod ? prod.in_stock : true;
+  document.getElementById('prodStock').checked = prod ? prod.in_stock : true; document.getElementById('prodBadge').value = prod?.badge||"";
   document.getElementById('prodPhoto').value = prod?.photo_url || '';
   const preview = document.getElementById('photoPreview');
   if (prod?.photo_url) { preview.src = prod.photo_url; preview.style.display = 'block'; }
@@ -481,7 +481,7 @@ async function saveProd() {
     quantity: parseInt(document.getElementById('prodQty').value) || 0,
     description: document.getElementById('prodDesc').value.trim(),
     photo_url: document.getElementById('prodPhoto').value || null,
-    in_stock: document.getElementById('prodStock').checked,
+    in_stock: document.getElementById('prodStock').checked, badge: document.getElementById('prodBadge').value||null,
   };
   if (!data.name) { alert('Nomi majburiy!'); return; }
   try {

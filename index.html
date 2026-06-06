@@ -43,6 +43,10 @@
   .b-som { font-size: 12px; color: var(--muted); font-weight: 600; margin-top: -1px; }
   .stock { align-self: flex-start; margin-top: 4px; font-size: 11px; font-weight: 700; color: var(--accent); background: var(--accent-soft); padding: 3px 9px; border-radius: 999px; }
   .stock.out { color: #b23b3b; background: #fae8e8; }
+  .badge-new { position: absolute; top: 8px; left: 8px; background: #1f6f4a; color: #fff; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 999px; letter-spacing: .4px; }
+  .badge-sale { position: absolute; top: 8px; left: 8px; background: #e53935; color: #fff; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 999px; letter-spacing: .4px; }
+  .badge-hot { position: absolute; top: 8px; left: 8px; background: #f57c00; color: #fff; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 999px; letter-spacing: .4px; }
+  .thumb-wrap { position: relative; }
 
   /* Cart bar */
   .cartbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: linear-gradient(to top, var(--card) 70%, rgba(255,255,255,0)); transform: translateY(120%); transition: transform .28s cubic-bezier(.2,.8,.2,1); }
@@ -161,6 +165,7 @@
 <div class="sheet" id="detailsheet" style="z-index:65">
   <div class="detail-img" id="detail-img"></div>
   <div class="detail-brand" id="detail-brand"></div>
+  <span id="detail-badge" style="display:none;background:#1f6f4a;color:#fff;font-size:11px;font-weight:800;padding:3px 10px;border-radius:999px;margin-bottom:6px;display:inline-block"></span>
   <div class="detail-name" id="detail-name"></div>
   <div class="detail-desc" id="detail-desc"></div>
   <div class="detail-price-row">
@@ -242,8 +247,11 @@ function renderGrid() {
   }
   box.innerHTML = list.map((p, i) => `
     <div class="card" style="animation-delay:${i * 0.03}s" onclick="openDetail(${p.id})">
-      <div class="thumb">
-        ${p.photo_url ? `<img src="${p.photo_url}" alt="${p.name}" loading="lazy">` : `<div class="ph">${p.categories?.emoji || '📦'}</div>`}
+      <div class="thumb-wrap">
+        <div class="thumb">
+          ${p.photo_url ? `<img src="${p.photo_url}" alt="${p.name}" loading="lazy">` : `<div class="ph">${p.categories?.emoji || '📦'}</div>`}
+        </div>
+        ${p.badge === 'new' ? '<span class="badge-new">🆕 Yangi</span>' : p.badge === 'sale' ? '<span class="badge-sale">🔥 Chegirma</span>' : p.badge === 'hot' ? '<span class="badge-hot">⭐ Ommabop</span>' : ''}
       </div>
       <div class="body">
         <div class="b-brand">${p.brand || p.categories?.name_uz || ''}</div>
@@ -269,6 +277,13 @@ function openDetail(id) {
     : `<div class="ph-big">${p.categories?.emoji || '📦'}</div>`;
 
   document.getElementById('detail-brand').textContent = p.brand || p.categories?.name_uz || '';
+  // Show badge in detail
+  const badgeMap = { new: '🆕 Yangi', sale: '🔥 Chegirma', hot: '⭐ Ommabop' };
+  const badgeEl = document.getElementById('detail-badge');
+  if (badgeEl) {
+    badgeEl.textContent = badgeMap[p.badge] || '';
+    badgeEl.style.display = p.badge ? 'inline-block' : 'none';
+  }
   document.getElementById('detail-name').textContent = p.name;
   document.getElementById('detail-desc').textContent = p.description || '';
   document.getElementById('detail-won').textContent = fmt(p.price_won) + ' ₩';
