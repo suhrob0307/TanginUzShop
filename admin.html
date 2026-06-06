@@ -507,7 +507,7 @@ async function loadOrders() {
     const orders = await api('orders', { params: '&order=created_at.desc' });
     if (!orders.length) { tbody.innerHTML = '<tr><td colspan="8" class="empty">Hali buyurtma yoq</td></tr>'; return; }
     tbody.innerHTML = orders.map(o => {
-      const items = (o.items || []).map(i => `${i.name} x${i.qty}`).join(', ');
+      const items = (o.items?.products || o.items || []).map(i => `${i.name} x${i.qty}`).join(', ');
       const date = new Date(o.created_at).toLocaleDateString('uz');
       return `<tr>
         <td>#${o.id}</td>
@@ -538,3 +538,4 @@ async function updateOrderStatus(id, status) {
 </script>
 </body>
 </html>
+
