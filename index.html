@@ -405,18 +405,22 @@ async function confirmOrder() {
   });
 
   try {
-    await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
+    const saveRes = await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
       method: 'POST',
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
       body: JSON.stringify({ user_id: tgUser.id || null, username: tgUser.username || phone, first_name: tgUser.first_name || 'Mijoz', items: { products: orderItems, phone }, total_won: cartWon(), total_som: cartSom(), status: 'new' })
     });
+    const savedData = await saveRes.json();
+    const orderId = savedData[0]?.id || 0;
 
     const itemsList = orderItems.map(i => `• ${i.name} x${i.qty} — ${fmt(i.price_won * i.qty)} ₩`).join('\n');
-    const msg = `🛒 YANGI BUYURTMA!\n\n👤 ${tgUser.first_name || 'Mijoz'}${tgUser.username ? ' (@' + tgUser.username + ')' : ''}\n📞 ${phone}\n\n📦 Mahsulotlar:\n${itemsList}\n\n💰 Jami: ${fmt(cartWon())} ₩\n≈ ${fmt(cartSom())} so'm`;
+    const msg = `🛒 YANGI BUYURTMA #${orderId}!\n\n👤 ${tgUser.first_name || 'Mijoz'}${tgUser.username ? ' (@' + tgUser.username + ')' : ''}\n📞 ${phone}\n\n📦 Mahsulotlar:\n${itemsList}\n\n💰 Jami: ${fmt(cartWon())} ₩\n≈ ${fmt(cartSom())} so'm`;
+
+    const keyboard = { inline_keyboard: [[{ text: '✅ Qabul qildim', callback_data: `sq_accept_${orderId}` }, { text: '🚚 Yolda', callback_data: `sq_ship_${orderId}` }], [{ text: '✅ Yetdi', callback_data: `sq_deliver_${orderId}` }, { text: '❌ Bekor', callback_data: `sq_cancel_${orderId}` }]] };
 
     await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: ADMIN_CHAT_ID, text: msg })
+      body: JSON.stringify({ chat_id: ADMIN_CHAT_ID, text: msg, reply_markup: keyboard })
     });
 
     Object.keys(cart).forEach(k => delete cart[k]);
