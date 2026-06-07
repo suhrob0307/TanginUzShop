@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="uz">
+<html lang="uz" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -7,208 +7,372 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #f4f5f7; --card: #ffffff; --ink: #14181f; --muted: #8a8f99;
-    --line: #ececef; --accent: #1f6f4a; --accent-soft: #e6f4ec;
-    --dark: #14181f; --radius: 18px; --shadow: 0 6px 22px rgba(20,24,31,.06);
-  }
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { margin: 0; padding: 0; }
-  body { font-family: 'Manrope', sans-serif; background: var(--bg); color: var(--ink); padding-bottom: 110px; }
+/* ═══════════════════════════════════ THEME ═══════════════════════════════════ */
+:root {
+  --bg:#f0f2f5; --card:#fff; --ink:#0d0d0d; --muted:#8a8f99;
+  --line:#e8e8e8; --accent:#1f6f4a; --accent-soft:#e6f4ec;
+  --nav:#fff; --nav-line:#ebebeb; --cat-bg:#fff; --search-bg:#fff;
+  --shadow:0 2px 12px rgba(0,0,0,.07); --radius:16px;
+}
+[data-theme="dark"] {
+  --bg:#0a0a0a; --card:#1a1a1a; --ink:#f0f0f0; --muted:#666;
+  --line:#2a2a2a; --accent:#25a063; --accent-soft:#162820;
+  --nav:#111; --nav-line:#222; --cat-bg:#1a1a1a; --search-bg:#1a1a1a;
+  --shadow:0 2px 12px rgba(0,0,0,.4);
+}
 
-  .topbar { position: sticky; top: 0; z-index: 30; background: var(--card); border-bottom: 1px solid var(--line); padding: 14px 16px 10px; }
-  .brand { text-align: center; font-weight: 800; font-size: 19px; margin: 0 0 12px; }
-  .brand span { color: var(--accent); }
-  .search { display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 11px 14px; }
-  .search svg { width: 18px; height: 18px; flex: none; opacity: .5; }
-  .search input { border: 0; outline: 0; background: transparent; width: 100%; font-family: inherit; font-size: 15px; color: var(--ink); }
+/* ═══════════════════════════════════ BASE ════════════════════════════════════ */
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--ink);transition:background .2s,color .2s}
 
-  .cats { display: flex; gap: 8px; overflow-x: auto; padding: 12px 16px 4px; scrollbar-width: none; }
-  .cats::-webkit-scrollbar { display: none; }
-  .pill { flex: none; border: 1px solid var(--line); background: var(--card); color: var(--ink); padding: 9px 18px; border-radius: 999px; font-size: 14px; font-weight: 600; cursor: pointer; transition: .15s; white-space: nowrap; }
-  .pill.active { background: var(--dark); color: #fff; border-color: var(--dark); }
+/* ═══════════════════════════════════ PAGES ══════════════════════════════════ */
+.page{display:none;position:fixed;inset:0;bottom:70px;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+.page.active{display:block}
+.page-scroll{padding-bottom:20px}
 
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 14px 16px; }
-  .card { background: var(--card); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; animation: rise .4s both; cursor: pointer; transition: transform .15s; }
-  .card:active { transform: scale(.97); }
-  @keyframes rise { from { opacity: 0; transform: translateY(8px);} to {opacity:1; transform:none;} }
-  .thumb { aspect-ratio: 1/1; background: linear-gradient(135deg,#fafbfc,#eef0f3); display: flex; align-items: center; justify-content: center; overflow: hidden; }
-  .thumb img { width: 100%; height: 100%; object-fit: cover; }
-  .thumb .ph { width: 64px; height: 84px; border-radius: 10px; background: linear-gradient(160deg,var(--accent),#2f9466); display:flex; align-items:center; justify-content:center; color:#fff; font-size: 28px; box-shadow: 0 8px 18px rgba(31,111,74,.28); }
-  .body { padding: 11px 12px 13px; display: flex; flex-direction: column; gap: 3px; flex: 1; }
-  .b-brand { font-size: 10.5px; font-weight: 700; letter-spacing: .6px; color: var(--muted); text-transform: uppercase; }
-  .b-name { font-size: 14px; font-weight: 700; line-height: 1.25; margin: 1px 0 2px; }
-  .b-won { font-size: 16px; font-weight: 800; }
-  .b-won small { font-size: 12px; font-weight: 700; }
-  .b-som { font-size: 12px; color: var(--muted); font-weight: 600; margin-top: -1px; }
-  .stock { align-self: flex-start; margin-top: 4px; font-size: 11px; font-weight: 700; color: var(--accent); background: var(--accent-soft); padding: 3px 9px; border-radius: 999px; }
-  .stock.out { color: #b23b3b; background: #fae8e8; }
-  .badge-new { position: absolute; top: 8px; left: 8px; background: #1f6f4a; color: #fff; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 999px; letter-spacing: .4px; }
-  .badge-sale { position: absolute; top: 8px; left: 8px; background: #e53935; color: #fff; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 999px; letter-spacing: .4px; }
-  .badge-hot { position: absolute; top: 8px; left: 8px; background: #f57c00; color: #fff; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 999px; letter-spacing: .4px; }
-  .thumb-wrap { position: relative; }
+/* ═══════════════════════════════════ HEADER ═════════════════════════════════ */
+.app-header{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 12px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.brand{font-weight:800;font-size:18px}.brand span{color:var(--accent)}
+.header-actions{display:flex;gap:8px;align-items:center}
+.theme-btn{background:var(--bg);border:0;border-radius:50%;width:36px;height:36px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 
-  /* Cart bar */
-  .cartbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: linear-gradient(to top, var(--card) 70%, rgba(255,255,255,0)); transform: translateY(120%); transition: transform .28s cubic-bezier(.2,.8,.2,1); }
-  .cartbar.show { transform: none; }
-  .cartbtn { width: 100%; background: var(--dark); color: #fff; border: 0; border-radius: 15px; padding: 15px 18px; font-family: inherit; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-shadow: 0 10px 30px rgba(20,24,31,.12); }
-  .cartbtn .count { background: rgba(255,255,255,.2); border-radius: 999px; padding: 2px 9px; font-size: 13px; margin-left: 8px; }
+/* ═══════════════════════════════════ SEARCH BAR ════════════════════════════ */
+.search-wrap{padding:12px 16px;background:var(--card);border-bottom:1px solid var(--line)}
+.search-box{display:flex;align-items:center;gap:8px;background:var(--search-bg);border:1.5px solid var(--line);border-radius:12px;padding:10px 14px}
+.search-box svg{width:16px;height:16px;flex:none;opacity:.4}
+.search-box input{border:0;outline:0;background:transparent;width:100%;font-family:inherit;font-size:15px;color:var(--ink)}
 
-  /* Overlay & sheets */
-  .overlay { position: fixed; inset: 0; z-index: 50; background: rgba(20,24,31,.45); opacity: 0; pointer-events: none; transition: .25s; }
-  .overlay.show { opacity: 1; pointer-events: auto; }
-  .sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; background: var(--card); border-radius: 22px 22px 0 0; padding: 18px 18px calc(18px + env(safe-area-inset-bottom)); transform: translateY(110%); transition: transform .3s cubic-bezier(.2,.8,.2,1); max-height: 82vh; overflow-y: auto; }
-  .sheet.show { transform: none; }
-  .sheet h2 { margin: 2px 0 14px; font-size: 19px; font-weight: 800; }
+/* ═══════════════════════════════════ SECTION ═══════════════════════════════ */
+.section-header{display:flex;align-items:center;justify-content:space-between;padding:18px 16px 10px}
+.section-title{font-size:16px;font-weight:800}
+.section-sub{font-size:12px;color:var(--muted);font-weight:600}
 
-  /* Cart sheet items */
-  .row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
-  .row .nm { flex: 1; font-size: 14px; font-weight: 600; line-height: 1.3; }
-  .row .pr { font-size: 14px; font-weight: 800; white-space: nowrap; }
-  .qty { display: flex; align-items: center; gap: 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
-  .qty button { width: 30px; height: 30px; border: 0; background: var(--bg); font-size: 17px; font-weight: 700; cursor: pointer; color: var(--ink); }
-  .qty span { width: 30px; text-align: center; font-size: 14px; font-weight: 700; }
-  .total { display: flex; justify-content: space-between; align-items: baseline; margin: 16px 0 14px; }
-  .total b { font-size: 21px; font-weight: 800; }
-  .t-som { font-size: 13px; color: var(--muted); font-weight: 600; }
-  .send { width: 100%; border: 0; border-radius: 15px; background: var(--accent); color: #fff; padding: 16px; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer; }
-  .send:disabled { opacity: .6; cursor: default; }
-  .close-btn { width: 100%; background: var(--bg); border: 0; border-radius: 13px; padding: 13px; margin-top: 9px; font-family: inherit; font-weight: 700; font-size: 14px; cursor: pointer; color: var(--ink); }
-  .note { font-size: 11.5px; color: var(--muted); text-align: center; margin-top: 10px; line-height: 1.4; }
-  .empty { text-align: center; color: var(--muted); padding: 30px 0 12px; font-weight: 600; }
-  .loading-screen { display: flex; align-items: center; justify-content: center; min-height: 60vh; color: var(--muted); font-size: 15px; font-weight: 600; }
+/* ═══════════════════════════════════ CATEGORY GRID ════════════════════════ */
+.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:4px 16px 4px}
+.cat-card{background:var(--card);border-radius:14px;padding:14px 8px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;border:2px solid transparent;transition:.15s;box-shadow:var(--shadow)}
+.cat-card.active{border-color:var(--accent);background:var(--accent-soft)}
+.cat-card .cat-icon{width:52px;height:52px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:24px}
+.cat-card.active .cat-icon{background:var(--accent-soft)}
+.cat-card .cat-name{font-size:11px;font-weight:700;text-align:center;line-height:1.3;color:var(--ink)}
+.cat-card.active .cat-name{color:var(--accent)}
+.cat-all .cat-icon{background:var(--accent);color:#fff}
 
-  /* Phone sheet */
-  .phone-inp-wrap { border: 1.5px solid var(--line); border-radius: 14px; padding: 14px 16px; display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
-  .phone-inp-wrap:focus-within { border-color: var(--accent); }
-  #phone-inp { border: 0; outline: 0; width: 100%; font-family: inherit; font-size: 16px; font-weight: 600; color: var(--ink); background: transparent; }
+/* ═══════════════════════════════════ PRODUCT GRID ═════════════════════════ */
+.prod-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:4px 16px 16px}
+.prod-card{background:var(--card);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column;cursor:pointer;transition:transform .15s;animation:rise .35s both}
+.prod-card:active{transform:scale(.97)}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.prod-thumb{position:relative;aspect-ratio:1/1;background:linear-gradient(135deg,#f5f5f5,#eaeaea);display:flex;align-items:center;justify-content:center;overflow:hidden}
+[data-theme="dark"] .prod-thumb{background:linear-gradient(135deg,#222,#1a1a1a)}
+.prod-thumb img{width:100%;height:100%;object-fit:cover}
+.prod-ph{width:56px;height:72px;border-radius:10px;background:linear-gradient(160deg,var(--accent),#2f9466);display:flex;align-items:center;justify-content:center;color:#fff;font-size:26px}
+.badge-pill{position:absolute;top:7px;left:7px;font-size:9.5px;font-weight:800;padding:3px 8px;border-radius:999px;letter-spacing:.3px}
+.badge-new{background:#1f6f4a;color:#fff}
+.badge-sale{background:#e53935;color:#fff}
+.badge-hot{background:#f57c00;color:#fff}
+.fav-btn{position:absolute;top:6px;right:6px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.18);border:0;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:.15s}
+[data-theme="dark"] .fav-btn{background:rgba(255,255,255,.12)}
+.fav-btn.active{background:rgba(229,57,53,.9)}
+.prod-body{padding:10px 10px 12px;flex:1;display:flex;flex-direction:column;gap:2px}
+.prod-brand{font-size:9.5px;font-weight:700;letter-spacing:.5px;color:var(--muted);text-transform:uppercase}
+.prod-name{font-size:13px;font-weight:700;line-height:1.25;margin:1px 0}
+.prod-won{font-size:15px;font-weight:800}
+.prod-won small{font-size:11px}
+.prod-som{font-size:11px;color:var(--muted);font-weight:600}
+.prod-stock{align-self:flex-start;margin-top:4px;font-size:10px;font-weight:700;color:var(--accent);background:var(--accent-soft);padding:2px 8px;border-radius:999px}
+.prod-stock.out{color:#e53935;background:#fde8e8}
 
-  /* Product detail sheet */
-  .detail-img { width: 100%; aspect-ratio: 1/1; background: linear-gradient(135deg,#fafbfc,#eef0f3); border-radius: 16px; overflow: hidden; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
-  .detail-img img { width: 100%; height: 100%; object-fit: cover; }
-  .detail-img .ph-big { width: 90px; height: 120px; border-radius: 14px; background: linear-gradient(160deg,var(--accent),#2f9466); display:flex; align-items:center; justify-content:center; color:#fff; font-size: 42px; box-shadow: 0 8px 18px rgba(31,111,74,.28); }
-  .detail-brand { font-size: 11px; font-weight: 700; letter-spacing: .7px; color: var(--muted); text-transform: uppercase; margin-bottom: 4px; }
-  .detail-name { font-size: 20px; font-weight: 800; line-height: 1.2; margin-bottom: 8px; }
-  .detail-desc { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 14px; }
-  .detail-price-row { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
-  .detail-won { font-size: 24px; font-weight: 800; }
-  .detail-som { font-size: 14px; color: var(--muted); font-weight: 600; }
-  .detail-stock { display: inline-block; margin-bottom: 18px; margin-top: 6px; font-size: 12px; font-weight: 700; color: var(--accent); background: var(--accent-soft); padding: 4px 12px; border-radius: 999px; }
-  .detail-stock.out { color: #b23b3b; background: #fae8e8; }
-  .detail-qty-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-  .detail-qty-row label { font-size: 14px; font-weight: 600; color: var(--muted); }
-  .detail-qty { display: flex; align-items: center; border: 1.5px solid var(--line); border-radius: 12px; overflow: hidden; }
-  .detail-qty button { width: 40px; height: 40px; border: 0; background: var(--bg); font-size: 20px; font-weight: 700; cursor: pointer; color: var(--ink); }
-  .detail-qty span { width: 40px; text-align: center; font-size: 16px; font-weight: 800; }
-  .add-to-cart-btn { width: 100%; border: 0; border-radius: 15px; background: var(--dark); color: #fff; padding: 16px; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer; transition: .15s; }
-  .add-to-cart-btn.added { background: var(--accent); }
-  .add-to-cart-btn:disabled { opacity: .4; cursor: default; }
+/* ═══════════════════════════════════ BOTTOM NAV ════════════════════════════ */
+.bottom-nav{position:fixed;left:0;right:0;bottom:0;height:70px;background:var(--nav);border-top:1px solid var(--nav-line);display:flex;align-items:center;justify-content:space-around;z-index:100;padding:0 4px calc(4px + env(safe-area-inset-bottom))}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:transparent;color:var(--muted);font-family:inherit;font-size:10px;font-weight:600;cursor:pointer;padding:8px 0;transition:.15s}
+.nav-btn.active{color:var(--accent)}
+.nav-btn .nav-icon{font-size:20px;line-height:1}
+.nav-cart-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;cursor:pointer;border:0;background:transparent;padding:0}
+.nav-cart-circle{width:52px;height:52px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 16px rgba(31,111,74,.4);margin-bottom:2px}
+.cart-count-badge{position:absolute;top:0;right:calc(50% - 32px);background:#e53935;color:#fff;font-size:10px;font-weight:800;min-width:18px;height:18px;border-radius:999px;display:flex;align-items:center;justify-content:center;padding:0 4px;display:none}
+.cart-count-badge.show{display:flex}
 
-  .success-box { grid-column: 1/3; text-align: center; padding: 60px 20px; }
-  .my-orders-btn { position: fixed; top: 14px; left: 16px; z-index: 99; background: rgba(0,0,0,0.08); color: #aaa; font-size: 11px; font-weight: 600; padding: 6px 12px; border-radius: 999px; text-decoration: none; cursor: pointer; border: 0; font-family: inherit; }
-  .order-card { background: var(--bg); border-radius: 14px; padding: 14px; margin-bottom: 10px; }
-  .order-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-  .order-num { font-size: 13px; font-weight: 800; }
-  .order-date { font-size: 11px; color: var(--muted); }
-  .order-status { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
-  .status-new { background: #e3f2fd; color: #1565c0; }
-  .status-accepted { background: #e8f5e9; color: #2e7d32; }
-  .status-shipping { background: #fff3e0; color: #e65100; }
-  .status-delivered { background: #e8f5e9; color: #1b5e20; }
-  .status-cancelled { background: #fce4ec; color: #b71c1c; }
-  .order-items { font-size: 13px; color: var(--muted); margin-bottom: 6px; line-height: 1.5; }
-  .order-total { font-size: 14px; font-weight: 800; }
-  .success-box .icon { font-size: 64px; margin-bottom: 16px; }
-  .success-box .title { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
-  .success-box .sub { color: var(--muted); font-size: 14px; line-height: 1.5; }
+/* ═══════════════════════════════════ PROFILE PAGE ═════════════════════════ */
+.prof-hero{background:linear-gradient(135deg,var(--accent),#2f9466);margin:16px;border-radius:20px;padding:24px 20px;display:flex;align-items:center;gap:16px}
+.prof-avatar{width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;flex:none}
+.prof-name{font-size:18px;font-weight:800;color:#fff}
+.prof-username{font-size:13px;color:rgba(255,255,255,.75);margin-top:2px}
+.menu-section{background:var(--card);border-radius:16px;margin:0 16px 12px;overflow:hidden;box-shadow:var(--shadow)}
+.menu-item{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line);cursor:pointer;font-size:15px;font-weight:600;transition:.1s}
+.menu-item:last-child{border-bottom:0}
+.menu-item:active{background:var(--bg)}
+.menu-item-icon{margin-right:10px;font-size:18px}
+.menu-item-right{color:var(--muted);font-size:18px}
+.prof-about{margin:0 16px 24px;text-align:center;color:var(--muted);font-size:13px;line-height:2}
+
+/* ═══════════════════════════════════ SEARCH PAGE ══════════════════════════ */
+.search-page-header{padding:16px 16px 12px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.search-page-title{font-size:18px;font-weight:800;margin-bottom:12px}
+.empty-state{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty-state .es-icon{font-size:48px;margin-bottom:12px}
+.empty-state .es-text{font-size:15px;font-weight:600}
+.empty-state .es-sub{font-size:13px;margin-top:4px}
+
+/* ═══════════════════════════════════ OVERLAYS & SHEETS ════════════════════ */
+.overlay{position:fixed;inset:0;z-index:110;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:.25s}
+.overlay.show{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:120;background:var(--card);border-radius:24px 24px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom));transform:translateY(110%);transition:transform .3s cubic-bezier(.2,.8,.2,1);max-height:88vh;overflow-y:auto}
+.sheet.show{transform:none}
+.sheet-handle{width:36px;height:4px;background:var(--line);border-radius:99px;margin:0 auto 16px}
+.sheet-title{font-size:19px;font-weight:800;margin-bottom:16px}
+
+/* ═══════════════════════════════════ CART SHEET ════════════════════════════ */
+.cart-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.cart-item-img{width:52px;height:52px;border-radius:10px;object-fit:cover;background:var(--bg);flex:none;display:flex;align-items:center;justify-content:center;font-size:20px}
+.cart-item-info{flex:1;min-width:0}
+.cart-item-name{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cart-item-price{font-size:12px;color:var(--muted);font-weight:600;margin-top:1px}
+.qty-ctrl{display:flex;align-items:center;border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
+.qty-ctrl button{width:32px;height:32px;border:0;background:var(--bg);font-size:16px;font-weight:700;cursor:pointer;color:var(--ink)}
+.qty-ctrl span{width:28px;text-align:center;font-size:13px;font-weight:800}
+.cart-total-row{display:flex;justify-content:space-between;align-items:baseline;margin:16px 0 14px}
+.cart-total-label{font-size:14px;color:var(--muted);font-weight:600}
+.cart-total-val{font-size:22px;font-weight:800}
+.cart-total-som{font-size:12px;color:var(--muted);font-weight:600}
+.btn-primary{width:100%;border:0;border-radius:14px;background:var(--accent);color:#fff;padding:16px;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;transition:.15s}
+.btn-primary:disabled{opacity:.6;cursor:default}
+.btn-secondary{width:100%;background:var(--bg);border:0;border-radius:12px;padding:13px;margin-top:10px;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;color:var(--ink)}
+
+/* ═══════════════════════════════════ DETAIL SHEET ═════════════════════════ */
+.detail-img{width:100%;aspect-ratio:1/1;border-radius:18px;background:var(--bg);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:16px}
+.detail-img img{width:100%;height:100%;object-fit:cover}
+.detail-ph{width:90px;height:120px;border-radius:14px;background:linear-gradient(160deg,var(--accent),#2f9466);display:flex;align-items:center;justify-content:center;color:#fff;font-size:40px}
+.detail-brand{font-size:11px;font-weight:700;letter-spacing:.6px;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
+.detail-name{font-size:21px;font-weight:800;line-height:1.2;margin-bottom:8px}
+.detail-desc{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:14px}
+.detail-price-won{font-size:26px;font-weight:800}
+.detail-price-som{font-size:14px;color:var(--muted);font-weight:600;margin-bottom:8px}
+.detail-stock-badge{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);background:var(--accent-soft);padding:4px 12px;border-radius:999px;margin-bottom:18px}
+.detail-stock-badge.out{color:#e53935;background:#fde8e8}
+.detail-qty-row{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.detail-qty-label{font-size:14px;font-weight:600;color:var(--muted)}
+.detail-qty{display:flex;align-items:center;border:1.5px solid var(--line);border-radius:12px;overflow:hidden}
+.detail-qty button{width:40px;height:40px;border:0;background:var(--bg);font-size:20px;font-weight:700;cursor:pointer;color:var(--ink)}
+.detail-qty span{width:40px;text-align:center;font-size:16px;font-weight:800}
+
+/* ═══════════════════════════════════ PHONE SHEET ═══════════════════════════ */
+.phone-inp-wrap{display:flex;align-items:center;gap:10px;border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:16px}
+.phone-inp-wrap:focus-within{border-color:var(--accent)}
+#phone-inp{border:0;outline:0;width:100%;font-family:inherit;font-size:16px;font-weight:600;color:var(--ink);background:transparent}
+
+/* ═══════════════════════════════════ ORDERS SHEET ══════════════════════════ */
+.order-card{background:var(--bg);border-radius:14px;padding:14px;margin-bottom:10px}
+.order-card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.order-id{font-size:13px;font-weight:800}
+.order-date{font-size:11px;color:var(--muted)}
+.order-st{font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px}
+.st-new{background:#e3f2fd;color:#1565c0}
+.st-accepted{background:#e8f5e9;color:#2e7d32}
+.st-shipping{background:#fff3e0;color:#e65100}
+.st-delivered{background:#e8f5e9;color:#1b5e20}
+.st-cancelled{background:#fce4ec;color:#b71c1c}
+.order-items-txt{font-size:13px;color:var(--muted);margin-bottom:4px;line-height:1.5}
+.order-total-txt{font-size:14px;font-weight:800}
+
+/* ═══════════════════════════════════ SUCCESS ═══════════════════════════════ */
+.success-wrap{grid-column:1/3;text-align:center;padding:60px 20px}
+.success-icon{font-size:64px;margin-bottom:16px}
+.success-title{font-size:20px;font-weight:800;margin-bottom:8px}
+.success-sub{color:var(--muted);font-size:14px;line-height:1.5}
+.loading-state{display:flex;align-items:center;justify-content:center;min-height:50vh;color:var(--muted);font-size:15px;font-weight:600}
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div class="brand">TanginUz <span>Do'kon</span> 🛍️</div>
-  <div class="search">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
-    <input id="q" placeholder="Mahsulot qidirish...">
+<!-- ═══════════ HOME PAGE ═══════════ -->
+<div id="page-home" class="page active">
+  <div class="page-scroll">
+    <div class="app-header">
+      <div class="brand">TanginUz <span>Do'kon</span> 🛍️</div>
+      <div class="header-actions">
+        <button class="theme-btn" onclick="toggleTheme()" id="theme-toggle-btn">🌙</button>
+      </div>
+    </div>
+    <div class="search-wrap">
+      <div class="search-box" onclick="showPage('search')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+        <input placeholder="Mahsulot qidirish..." readonly style="cursor:pointer">
+      </div>
+    </div>
+    <div class="section-header">
+      <span class="section-title">Kategoriyalar</span>
+      <span class="section-sub" id="active-cat-label">Barchasi</span>
+    </div>
+    <div class="cat-grid" id="cat-grid"><div class="loading-state">Yuklanmoqda...</div></div>
+    <div class="section-header" style="margin-top:8px">
+      <span class="section-title" id="prod-section-title">Mahsulotlar</span>
+      <span class="section-sub" id="prod-count"></span>
+    </div>
+    <div class="prod-grid" id="prod-grid"><div class="loading-state">⏳</div></div>
   </div>
 </div>
 
-<div class="cats" id="cats"><div style="padding:8px;color:#aaa">Yuklanmoqda...</div></div>
-<div class="grid" id="grid"><div class="loading-screen">Mahsulotlar yuklanmoqda... ⏳</div></div>
+<!-- ═══════════ SEARCH PAGE ═══════════ -->
+<div id="page-search" class="page">
+  <div class="page-scroll">
+    <div class="search-page-header">
+      <div class="search-page-title">🔍 Qidiruv</div>
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+        <input id="search-input" placeholder="Mahsulot nomini yozing..." oninput="doSearch(this.value)">
+      </div>
+    </div>
+    <div class="prod-grid" id="search-grid" style="margin-top:12px">
+      <div class="empty-state" style="grid-column:1/3">
+        <div class="es-icon">🔍</div>
+        <div class="es-text">Qidirish uchun yozing</div>
+        <div class="es-sub">Mahsulot nomi yoki brend</div>
+      </div>
+    </div>
+  </div>
+</div>
 
-<div class="cartbar" id="cartbar">
-  <button class="cartbtn" onclick="openCart()">
-    <span>Savatni ko'rish <span class="count" id="cnt">0</span></span>
-    <span id="bartotal">0 ₩</span>
+<!-- ═══════════ FAVORITES PAGE ═══════════ -->
+<div id="page-favorites" class="page">
+  <div class="page-scroll">
+    <div class="app-header">
+      <div class="brand">❤️ Sevimlilar</div>
+    </div>
+    <div class="prod-grid" style="margin-top:12px" id="fav-grid">
+      <div class="empty-state" style="grid-column:1/3">
+        <div class="es-icon">❤️</div>
+        <div class="es-text">Sevimlilar bo'sh</div>
+        <div class="es-sub">Mahsulot kartasidagi ❤️ ni bosing</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ PROFILE PAGE ═══════════ -->
+<div id="page-profile" class="page">
+  <div class="page-scroll">
+    <div class="app-header">
+      <div class="brand">👤 Profil</div>
+    </div>
+    <div class="prof-hero">
+      <div class="prof-avatar" id="prof-avatar">T</div>
+      <div>
+        <div class="prof-name" id="prof-name">TanginUz</div>
+        <div class="prof-username" id="prof-username">Xush kelibsiz!</div>
+      </div>
+    </div>
+    <div class="menu-section">
+      <div class="menu-item" onclick="openOrders()">
+        <span><span class="menu-item-icon">📋</span>Buyurtmalar tarixi</span>
+        <span class="menu-item-right">›</span>
+      </div>
+      <div class="menu-item" onclick="toggleTheme()">
+        <span><span class="menu-item-icon" id="theme-menu-icon">🌙</span><span id="theme-menu-label">Qora tema</span></span>
+        <span class="menu-item-right">›</span>
+      </div>
+    </div>
+    <div class="menu-section">
+      <div class="menu-item" onclick="window.location.href='admin.html'">
+        <span><span class="menu-item-icon">⚙️</span>Admin panel</span>
+        <span class="menu-item-right">›</span>
+      </div>
+    </div>
+    <div class="prof-about">
+      <div>📍 Gyeongsan, Koreya</div>
+      <div>📞 +82 010-5509-1991</div>
+      <div>💬 @Tangin_admin</div>
+      <div style="margin-top:8px;font-size:12px;opacity:.5">TanginUz v2.0</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ BOTTOM NAV ═══════════ -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="nav-home" onclick="showPage('home')">
+    <span class="nav-icon">🏠</span><span>Bosh</span>
   </button>
-</div>
+  <button class="nav-btn" id="nav-search" onclick="showPage('search')">
+    <span class="nav-icon">🔍</span><span>Qidiruv</span>
+  </button>
+  <button class="nav-cart-wrap" onclick="openCart()" style="flex:1;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;border:0;background:transparent;cursor:pointer;padding-bottom:6px">
+    <div class="nav-cart-circle">🛒</div>
+    <div class="cart-count-badge" id="cart-badge">0</div>
+  </button>
+  <button class="nav-btn" id="nav-favorites" onclick="showPage('favorites')">
+    <span class="nav-icon">❤️</span><span>Sevimlilar</span>
+  </button>
+  <button class="nav-btn" id="nav-profile" onclick="showPage('profile')">
+    <span class="nav-icon">👤</span><span>Profil</span>
+  </button>
+</nav>
 
-<!-- Cart sheet -->
-<div class="overlay" id="overlay" onclick="closeCart()"></div>
-<div class="sheet" id="sheet">
-  <h2>🛒 Savat</h2>
-  <div id="cartitems"></div>
-  <div class="total" id="totalrow" style="display:none">
-    <span>Jami:</span>
-    <span style="text-align:right">
-      <b id="t-won">0 ₩</b><br>
-      <span class="t-som" id="t-som">0 so'm</span>
-    </span>
+<!-- ═══════════ OVERLAYS ═══════════ -->
+<div class="overlay" id="ov1" onclick="closeCart()"></div>
+<div class="overlay" id="ov2" onclick="closeDetail()"></div>
+<div class="overlay" id="ov3" onclick="closePhone()"></div>
+<div class="overlay" id="ov4" onclick="closeOrders()"></div>
+
+<!-- ═══════════ CART SHEET ═══════════ -->
+<div class="sheet" id="cart-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title">🛒 Savat</div>
+  <div id="cart-items-wrap"></div>
+  <div id="cart-total-wrap" style="display:none">
+    <div class="cart-total-row">
+      <span class="cart-total-label">Jami:</span>
+      <span style="text-align:right">
+        <div class="cart-total-val" id="ct-won">0 ₩</div>
+        <div class="cart-total-som" id="ct-som">0 so'm</div>
+      </span>
+    </div>
+    <button class="btn-primary" id="order-btn" onclick="sendOrder()">📦 Buyurtma berish</button>
   </div>
-  <button class="send" id="sendbtn" onclick="sendOrder()" style="display:none">📦 Buyurtma berish</button>
-  <button class="close-btn" onclick="closeCart()">Yopish</button>
-  <div class="note">Buyurtma @Tangin_admin ga yuboriladi.</div>
+  <button class="btn-secondary" onclick="closeCart()">Yopish</button>
 </div>
 
-<!-- Phone sheet -->
-<div class="overlay" id="overlay2" onclick="closePhone()"></div>
-<div class="sheet" id="phonesheet" style="z-index:70">
-  <h2>📞 Telefon raqam</h2>
-  <p style="color:var(--muted);font-size:14px;margin:0 0 16px;line-height:1.5">Buyurtmangizni tasdiqlash uchun telefon raqamingizni kiriting. Tez orada bog'lanamiz!</p>
+<!-- ═══════════ DETAIL SHEET ═══════════ -->
+<div class="sheet" id="detail-sheet" style="z-index:125">
+  <div class="sheet-handle"></div>
+  <div class="detail-img" id="detail-img-wrap"></div>
+  <div class="detail-brand" id="detail-brand"></div>
+  <div class="detail-name" id="detail-name"></div>
+  <div class="detail-desc" id="detail-desc"></div>
+  <div class="detail-price-won" id="detail-won"></div>
+  <div class="detail-price-som" id="detail-som"></div>
+  <div class="detail-stock-badge" id="detail-stock"></div>
+  <div class="detail-qty-row" id="detail-qty-row">
+    <span class="detail-qty-label">Miqdor:</span>
+    <div class="detail-qty">
+      <button onclick="chDetailQty(-1)">−</button>
+      <span id="detail-qty-val">1</span>
+      <button onclick="chDetailQty(1)">+</button>
+    </div>
+  </div>
+  <button class="btn-primary" id="detail-add-btn" onclick="addFromDetail()">🛒 Savatga qo'shish</button>
+  <button class="btn-secondary" onclick="closeDetail()">Yopish</button>
+</div>
+
+<!-- ═══════════ PHONE SHEET ═══════════ -->
+<div class="sheet" id="phone-sheet" style="z-index:130">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title">📞 Telefon raqam</div>
+  <p style="color:var(--muted);font-size:14px;margin-bottom:16px;line-height:1.5">Tez orada siz bilan bog'lanamiz!</p>
   <div class="phone-inp-wrap">
     <span style="font-size:22px">📱</span>
     <input id="phone-inp" type="tel" placeholder="+998 90 123 45 67" inputmode="tel">
   </div>
-  <button class="send" id="confirmbtn" onclick="confirmOrder()">✅ Tasdiqlash va yuborish</button>
-  <button class="close-btn" onclick="closePhone()">Bekor qilish</button>
+  <button class="btn-primary" id="confirm-btn" onclick="confirmOrder()">✅ Tasdiqlash va yuborish</button>
+  <button class="btn-secondary" onclick="closePhone()">Bekor qilish</button>
 </div>
 
-<!-- Product detail sheet -->
-<div class="overlay" id="overlay3" onclick="closeDetail()"></div>
-<div class="sheet" id="detailsheet" style="z-index:65">
-  <div class="detail-img" id="detail-img"></div>
-  <div class="detail-brand" id="detail-brand"></div>
-  <span id="detail-badge" style="display:none;background:#1f6f4a;color:#fff;font-size:11px;font-weight:800;padding:3px 10px;border-radius:999px;margin-bottom:6px;display:inline-block"></span>
-  <div class="detail-name" id="detail-name"></div>
-  <div class="detail-desc" id="detail-desc"></div>
-  <div class="detail-price-row">
-    <span class="detail-won" id="detail-won"></span>
-    <span class="detail-som" id="detail-som"></span>
-  </div>
-  <div class="detail-stock" id="detail-stock"></div>
-  <div class="detail-qty-row" id="detail-qty-row">
-    <label>Miqdor:</label>
-    <div class="detail-qty">
-      <button onclick="changeDetailQty(-1)">−</button>
-      <span id="detail-qty-val">1</span>
-      <button onclick="changeDetailQty(1)">+</button>
-    </div>
-  </div>
-  <button class="add-to-cart-btn" id="detail-add-btn" onclick="addFromDetail()">🛒 Savatga qo'shish</button>
-  <button class="close-btn" onclick="closeDetail()">Yopish</button>
+<!-- ═══════════ ORDERS SHEET ═══════════ -->
+<div class="sheet" id="orders-sheet" style="z-index:135">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title">📋 Buyurtmalar tarixi</div>
+  <div id="orders-wrap"><div class="loading-state">Yuklanmoqda...</div></div>
+  <button class="btn-secondary" onclick="closeOrders()">Yopish</button>
 </div>
-
-
-<!-- My Orders sheet -->
-<div class="overlay" id="overlay4" onclick="closeOrders()"></div>
-<div class="sheet" id="orderssheet" style="z-index:75">
-  <h2>📋 Buyurtmalarim</h2>
-  <div id="orders-list"><div style="text-align:center;padding:30px;color:var(--muted)">Yuklanmoqda...</div></div>
-  <button class="close-btn" onclick="closeOrders()">Yopish</button>
-</div>
-
-<button class="my-orders-btn" onclick="openOrders()">📋 Buyurtmalarim</button>
-<a href="admin.html" style="position:fixed;top:14px;right:16px;z-index:99;background:rgba(0,0,0,0.08);color:#aaa;font-size:11px;font-weight:600;padding:6px 12px;border-radius:999px;text-decoration:none">Admin</a>
 
 <script>
 const SUPABASE_URL = 'https://giggypnwidjnpusyonoo.supabase.co';
@@ -219,325 +383,362 @@ const ADMIN_CHAT_ID = '6750264043';
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 
-let allProducts = [], allCategories = [], activeCat = 'all', searchQuery = '';
+let allProducts = [], allCategories = [], activeCatId = null;
 const cart = {};
-let detailProduct = null, detailQty = 1;
+let detailProd = null, detailQty = 1;
+let favorites = [];
+try { favorites = JSON.parse(localStorage.getItem('tuz_favs') || '[]'); } catch(e) {}
 
-async function fetchData(table, params = '') {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`, {
-    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-  });
-  return res.json();
+/* ══════ THEME ══════ */
+function initTheme() {
+  const saved = localStorage.getItem('tuz_theme') || 'light';
+  setTheme(saved);
+}
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('tuz_theme', t);
+  const isDark = t === 'dark';
+  document.getElementById('theme-toggle-btn').textContent = isDark ? '☀️' : '🌙';
+  document.getElementById('theme-menu-icon').textContent = isDark ? '☀️' : '🌙';
+  document.getElementById('theme-menu-label').textContent = isDark ? 'Yoriq tema' : 'Qora tema';
+}
+function toggleTheme() {
+  const cur = document.documentElement.getAttribute('data-theme');
+  setTheme(cur === 'dark' ? 'light' : 'dark');
 }
 
-function fmt(n) { return (n || 0).toLocaleString('ru-RU'); }
+/* ══════ PAGES ══════ */
+const PAGES = ['home','search','favorites','profile'];
+function showPage(p) {
+  PAGES.forEach(id => document.getElementById('page-'+id).classList.toggle('active', id === p));
+  ['home','search','favorites','profile'].forEach(id => {
+    const btn = document.getElementById('nav-'+id);
+    if(btn) btn.classList.toggle('active', id === p);
+  });
+  if(p === 'search') setTimeout(() => document.getElementById('search-input').focus(), 300);
+  if(p === 'favorites') renderFavorites();
+  if(p === 'profile') loadProfile();
+}
 
+/* ══════ API ══════ */
+function fmt(n) { return (n||0).toLocaleString('ru-RU'); }
+async function api(table, params='') {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`, {
+    headers: {'apikey':SUPABASE_KEY, 'Authorization':`Bearer ${SUPABASE_KEY}`}
+  });
+  return r.json();
+}
+
+/* ══════ INIT ══════ */
 async function init() {
   try {
     const [cats, prods] = await Promise.all([
-      fetchData('categories', 'order=sort_order.asc'),
-      fetchData('products', 'order=created_at.desc&select=*,categories(name_uz,emoji)')
+      api('categories','order=sort_order.asc'),
+      api('products','order=created_at.desc&select=*,categories(name_uz,emoji)')
     ]);
     allCategories = cats;
     allProducts = prods;
-    renderCats();
-    renderGrid();
-  } catch (e) {
-    document.getElementById('grid').innerHTML = '<div class="loading-screen">Xato yuz berdi. Sahifani yangilang.</div>';
+    renderCategories();
+    renderProducts(allProducts, 'prod-grid');
+    updateProdTitle();
+  } catch(e) {
+    document.getElementById('prod-grid').innerHTML = '<div class="loading-state">Xato. Qayta urinib ko\'ring.</div>';
   }
 }
 
-function renderCats() {
-  const box = document.getElementById('cats');
-  const all = [{ id: 'all', emoji: '🛍️', name_uz: 'Barchasi' }, ...allCategories];
-  box.innerHTML = all.map(c =>
-    `<button class="pill ${c.id == activeCat ? 'active' : ''}" onclick="setCat('${c.id}')">${c.emoji || ''} ${c.name_uz}</button>`
-  ).join('');
+/* ══════ CATEGORIES ══════ */
+function renderCategories() {
+  const box = document.getElementById('cat-grid');
+  const allBtn = `<div class="cat-card cat-all ${activeCatId===null?'active':''}" onclick="selectCat(null,'Barchasi')">
+    <div class="cat-icon">🛍️</div>
+    <div class="cat-name">Barchasi</div>
+  </div>`;
+  const cats = allCategories.map(c => `
+    <div class="cat-card ${activeCatId==c.id?'active':''}" onclick="selectCat(${c.id},'${c.name_uz}')">
+      <div class="cat-icon">${c.emoji||'📦'}</div>
+      <div class="cat-name">${c.name_uz}</div>
+    </div>`).join('');
+  box.innerHTML = allBtn + cats;
 }
 
-function setCat(id) { activeCat = id; renderCats(); renderGrid(); }
+function selectCat(id, name) {
+  activeCatId = id;
+  document.getElementById('active-cat-label').textContent = name;
+  renderCategories();
+  const filtered = id === null ? allProducts : allProducts.filter(p => p.category_id == id);
+  renderProducts(filtered, 'prod-grid');
+  updateProdTitle(name, filtered.length);
+}
 
-function renderGrid() {
-  const list = allProducts.filter(p => {
-    const okCat = activeCat === 'all' || p.category_id == activeCat;
-    const okSearch = !searchQuery || (p.name + ' ' + (p.brand || '')).toLowerCase().includes(searchQuery);
-    return okCat && okSearch;
-  });
-  const box = document.getElementById('grid');
-  if (!list.length) {
-    box.innerHTML = '<div style="grid-column:1/3;text-align:center;padding:40px;color:#aaa;font-weight:600">Mahsulot topilmadi</div>';
+function updateProdTitle(name, count) {
+  document.getElementById('prod-section-title').textContent = name && name !== 'Barchasi' ? name : 'Barcha mahsulotlar';
+  document.getElementById('prod-count').textContent = count !== undefined ? count + ' ta' : allProducts.length + ' ta';
+}
+
+/* ══════ PRODUCTS ══════ */
+function prodCardHTML(p, i) {
+  const badgeMap = {new:'badge-new',sale:'badge-sale',hot:'badge-hot'};
+  const badgeLabel = {new:'🆕 Yangi',sale:'🔥 Chegirma',hot:'⭐ Ommabop'};
+  const badge = p.badge && badgeMap[p.badge] ? `<span class="badge-pill ${badgeMap[p.badge]}">${badgeLabel[p.badge]}</span>` : '';
+  const fav = favorites.includes(p.id);
+  const img = p.photo_url
+    ? `<img src="${p.photo_url}" alt="${p.name}" loading="lazy">`
+    : `<div class="prod-ph">${p.categories?.emoji||'📦'}</div>`;
+  const inCart = cart[p.id] ? `<div class="prod-stock">🛒 ${cart[p.id]} ta</div>` : (p.in_stock ? `<div class="prod-stock">Mavjud</div>` : `<div class="prod-stock out">Tugagan</div>`);
+  return `<div class="prod-card" style="animation-delay:${i*.04}s" onclick="openDetail(${p.id})">
+    <div class="prod-thumb">
+      ${img}
+      ${badge}
+      <button class="fav-btn ${fav?'active':''}" onclick="toggleFav(event,${p.id})">${fav?'❤️':'🤍'}</button>
+    </div>
+    <div class="prod-body">
+      <div class="prod-brand">${p.brand||p.categories?.name_uz||''}</div>
+      <div class="prod-name">${p.name}</div>
+      <div class="prod-won">${fmt(p.price_won)} <small>₩</small></div>
+      <div class="prod-som">${fmt(p.price_som)} so'm</div>
+      ${inCart}
+    </div>
+  </div>`;
+}
+
+function renderProducts(list, containerId) {
+  const box = document.getElementById(containerId);
+  if(!list.length) {
+    box.innerHTML = '<div class="empty-state" style="grid-column:1/3"><div class="es-icon">📦</div><div class="es-text">Mahsulot topilmadi</div></div>';
     return;
   }
-  box.innerHTML = list.map((p, i) => `
-    <div class="card" style="animation-delay:${i * 0.03}s" onclick="openDetail(${p.id})">
-      <div class="thumb-wrap">
-        <div class="thumb">
-          ${p.photo_url ? `<img src="${p.photo_url}" alt="${p.name}" loading="lazy">` : `<div class="ph">${p.categories?.emoji || '📦'}</div>`}
-        </div>
-        ${p.badge === 'new' ? '<span class="badge-new">🆕 Yangi</span>' : p.badge === 'sale' ? '<span class="badge-sale">🔥 Chegirma</span>' : p.badge === 'hot' ? '<span class="badge-hot">⭐ Ommabop</span>' : ''}
-      </div>
-      <div class="body">
-        <div class="b-brand">${p.brand || p.categories?.name_uz || ''}</div>
-        <div class="b-name">${p.name}</div>
-        <div class="b-won">${fmt(p.price_won)} <small>₩</small></div>
-        <div class="b-som">${fmt(p.price_som)} so'm</div>
-        <div class="stock ${p.in_stock ? '' : 'out'}">${p.in_stock ? cart[p.id] ? '🛒 ' + cart[p.id] + ' ta savatda' : 'Mavjud' : 'Tugagan'}</div>
-      </div>
-    </div>`).join('');
+  box.innerHTML = list.map((p,i) => prodCardHTML(p,i)).join('');
 }
 
-// ── DETAIL SHEET ──
+/* ══════ FAVORITES ══════ */
+function toggleFav(e, id) {
+  e.stopPropagation();
+  if(favorites.includes(id)) favorites = favorites.filter(f => f !== id);
+  else favorites.push(id);
+  try { localStorage.setItem('tuz_favs', JSON.stringify(favorites)); } catch(e) {}
+  // Re-render current visible product lists
+  const filtered = activeCatId === null ? allProducts : allProducts.filter(p => p.category_id == activeCatId);
+  renderProducts(filtered, 'prod-grid');
+  if(document.getElementById('page-favorites').classList.contains('active')) renderFavorites();
+  if(tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+}
+
+function renderFavorites() {
+  const favProds = allProducts.filter(p => favorites.includes(p.id));
+  const box = document.getElementById('fav-grid');
+  if(!favProds.length) {
+    box.innerHTML = '<div class="empty-state" style="grid-column:1/3"><div class="es-icon">❤️</div><div class="es-text">Sevimlilar bo\'sh</div><div class="es-sub">Mahsulot kartasidagi 🤍 ni bosing</div></div>';
+    return;
+  }
+  box.innerHTML = favProds.map((p,i) => prodCardHTML(p,i)).join('');
+}
+
+/* ══════ SEARCH ══════ */
+function doSearch(q) {
+  const query = q.toLowerCase().trim();
+  const box = document.getElementById('search-grid');
+  if(!query) {
+    box.innerHTML = '<div class="empty-state" style="grid-column:1/3"><div class="es-icon">🔍</div><div class="es-text">Qidirish uchun yozing</div><div class="es-sub">Mahsulot nomi yoki brend</div></div>';
+    return;
+  }
+  const results = allProducts.filter(p =>
+    (p.name+' '+(p.brand||'')+(p.description||'')).toLowerCase().includes(query)
+  );
+  renderProducts(results, 'search-grid');
+}
+
+/* ══════ DETAIL SHEET ══════ */
 function openDetail(id) {
   const p = allProducts.find(x => x.id === id);
-  if (!p) return;
-  detailProduct = p;
-  detailQty = 1;
-
-  // Image
-  const imgBox = document.getElementById('detail-img');
-  imgBox.innerHTML = p.photo_url
-    ? `<img src="${p.photo_url}" alt="${p.name}">`
-    : `<div class="ph-big">${p.categories?.emoji || '📦'}</div>`;
-
-  document.getElementById('detail-brand').textContent = p.brand || p.categories?.name_uz || '';
-  // Show badge in detail
-  const badgeMap = { new: '🆕 Yangi', sale: '🔥 Chegirma', hot: '⭐ Ommabop' };
-  const badgeEl = document.getElementById('detail-badge');
-  if (badgeEl) {
-    badgeEl.textContent = badgeMap[p.badge] || '';
-    badgeEl.style.display = p.badge ? 'inline-block' : 'none';
-  }
+  if(!p) return;
+  detailProd = p; detailQty = 1;
+  const imgWrap = document.getElementById('detail-img-wrap');
+  imgWrap.innerHTML = p.photo_url ? `<img src="${p.photo_url}" alt="${p.name}">` : `<div class="detail-ph">${p.categories?.emoji||'📦'}</div>`;
+  document.getElementById('detail-brand').textContent = p.brand||p.categories?.name_uz||'';
   document.getElementById('detail-name').textContent = p.name;
-  document.getElementById('detail-desc').textContent = p.description || '';
-  document.getElementById('detail-won').textContent = fmt(p.price_won) + ' ₩';
-  document.getElementById('detail-som').textContent = '≈ ' + fmt(p.price_som) + " so'm";
-
-  const stockEl = document.getElementById('detail-stock');
-  stockEl.textContent = p.in_stock ? '✅ Mavjud' : '❌ Tugagan';
-  stockEl.className = 'detail-stock' + (p.in_stock ? '' : ' out');
-
-  const qtyRow = document.getElementById('detail-qty-row');
-  const addBtn = document.getElementById('detail-add-btn');
-  document.getElementById('detail-qty-val').textContent = detailQty;
-
-  if (p.in_stock) {
-    qtyRow.style.display = 'flex';
-    addBtn.disabled = false;
-    addBtn.className = cart[p.id] ? 'add-to-cart-btn added' : 'add-to-cart-btn';
-    addBtn.textContent = cart[p.id] ? `🛒 Savatga qo'shish (${cart[p.id]} ta bor)` : "🛒 Savatga qo'shish";
-  } else {
-    qtyRow.style.display = 'none';
-    addBtn.disabled = true;
-    addBtn.textContent = 'Mavjud emas';
-  }
-
-  document.getElementById('overlay3').classList.add('show');
-  document.getElementById('detailsheet').classList.add('show');
-  if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+  document.getElementById('detail-desc').textContent = p.description||'';
+  document.getElementById('detail-won').textContent = fmt(p.price_won)+' ₩';
+  document.getElementById('detail-som').textContent = '≈ '+fmt(p.price_som)+' so\'m';
+  const st = document.getElementById('detail-stock');
+  st.textContent = p.in_stock ? '✅ Mavjud' : '❌ Tugagan';
+  st.className = 'detail-stock-badge'+(p.in_stock?'':' out');
+  document.getElementById('detail-qty-row').style.display = p.in_stock ? 'flex' : 'none';
+  document.getElementById('detail-qty-val').textContent = 1;
+  const btn = document.getElementById('detail-add-btn');
+  btn.disabled = !p.in_stock;
+  btn.className = 'btn-primary'+(cart[p.id]?' added':'');
+  btn.textContent = cart[p.id] ? `🛒 Savatga qo'shish (${cart[p.id]} ta)` : "🛒 Savatga qo'shish";
+  showSheet('detail-sheet','ov2');
+  if(tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
 }
+function closeDetail() { hideSheet('detail-sheet','ov2'); }
 
-function closeDetail() {
-  document.getElementById('overlay3').classList.remove('show');
-  document.getElementById('detailsheet').classList.remove('show');
-}
-
-function changeDetailQty(d) {
+function chDetailQty(d) {
   detailQty = Math.max(1, detailQty + d);
   document.getElementById('detail-qty-val').textContent = detailQty;
 }
 
 function addFromDetail() {
-  if (!detailProduct) return;
-  cart[detailProduct.id] = (cart[detailProduct.id] || 0) + detailQty;
-  updateBar();
-  renderGrid();
+  if(!detailProd) return;
+  cart[detailProd.id] = (cart[detailProd.id]||0) + detailQty;
+  updateCartBadge();
+  const filtered = activeCatId === null ? allProducts : allProducts.filter(p => p.category_id == activeCatId);
+  renderProducts(filtered, 'prod-grid');
   const btn = document.getElementById('detail-add-btn');
-  btn.className = 'add-to-cart-btn added';
-  btn.textContent = `✅ Savatga qo'shildi (${cart[detailProduct.id]} ta)`;
-  if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-  setTimeout(() => closeDetail(), 800);
+  btn.className = 'btn-primary';
+  btn.textContent = `✅ Qo'shildi (${cart[detailProd.id]} ta)`;
+  if(tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+  setTimeout(() => closeDetail(), 700);
 }
 
-// ── CART ──
-function cartCount() { return Object.values(cart).reduce((a, b) => a + b, 0); }
-function cartWon() { return Object.entries(cart).reduce((s, [id, q]) => s + (prod(id)?.price_won || 0) * q, 0); }
-function cartSom() { return Object.entries(cart).reduce((s, [id, q]) => s + (prod(id)?.price_som || 0) * q, 0); }
-function prod(id) { return allProducts.find(p => p.id == id); }
+/* ══════ CART ══════ */
+function cartCount() { return Object.values(cart).reduce((a,b)=>a+b,0); }
+function cartWon() { return Object.entries(cart).reduce((s,[id,q])=>s+(prod(id)?.price_won||0)*q,0); }
+function cartSom() { return Object.entries(cart).reduce((s,[id,q])=>s+(prod(id)?.price_som||0)*q,0); }
+function prod(id) { return allProducts.find(p=>p.id==id); }
 
-function updateBar() {
+function updateCartBadge() {
   const c = cartCount();
-  document.getElementById('cnt').textContent = c;
-  document.getElementById('bartotal').textContent = fmt(cartWon()) + ' ₩';
-  document.getElementById('cartbar').classList.toggle('show', c > 0);
+  const badge = document.getElementById('cart-badge');
+  badge.textContent = c;
+  badge.classList.toggle('show', c > 0);
 }
 
 function openCart() {
-  renderCartItems();
-  document.getElementById('overlay').classList.add('show');
-  document.getElementById('sheet').classList.add('show');
+  renderCart();
+  showSheet('cart-sheet','ov1');
+}
+function closeCart() { hideSheet('cart-sheet','ov1'); }
+
+function chCartQty(id, d) {
+  cart[id] = (cart[id]||0) + d;
+  if(cart[id] <= 0) delete cart[id];
+  updateCartBadge();
+  renderCart();
+  const filtered = activeCatId === null ? allProducts : allProducts.filter(p => p.category_id == activeCatId);
+  renderProducts(filtered, 'prod-grid');
 }
 
-function closeCart() {
-  document.getElementById('overlay').classList.remove('show');
-  document.getElementById('sheet').classList.remove('show');
-}
-
-function changeQty(id, d) {
-  cart[id] = (cart[id] || 0) + d;
-  if (cart[id] <= 0) delete cart[id];
-  updateBar(); renderCartItems(); renderGrid();
-}
-
-function renderCartItems() {
+function renderCart() {
   const ids = Object.keys(cart);
-  const box = document.getElementById('cartitems');
-  const totalRow = document.getElementById('totalrow');
-  const sendBtn = document.getElementById('sendbtn');
-  if (!ids.length) {
-    box.innerHTML = '<div class="empty">Savat bo\'sh</div>';
-    totalRow.style.display = 'none'; sendBtn.style.display = 'none'; return;
+  const wrap = document.getElementById('cart-items-wrap');
+  const total = document.getElementById('cart-total-wrap');
+  const btn = document.getElementById('order-btn');
+  if(!ids.length) {
+    wrap.innerHTML = '<div class="empty-state"><div class="es-icon">🛒</div><div class="es-text">Savat bo\'sh</div><div class="es-sub">Mahsulotlarni savatga qo\'shing</div></div>';
+    total.style.display = 'none'; return;
   }
-  totalRow.style.display = 'flex'; sendBtn.style.display = 'block';
-  box.innerHTML = ids.map(id => {
+  total.style.display = 'block';
+  wrap.innerHTML = ids.map(id => {
     const p = prod(id), q = cart[id];
-    if (!p) return '';
-    return `<div class="row">
-      <div class="nm">${p.name}<br><span style="color:var(--muted);font-size:12px">${fmt(p.price_won)} ₩</span></div>
-      <div class="qty">
-        <button onclick="changeQty(${id},-1)">−</button>
-        <span>${q}</span>
-        <button onclick="changeQty(${id},1)">+</button>
+    if(!p) return '';
+    const imgEl = p.photo_url ? `<img src="${p.photo_url}" class="cart-item-img" style="border-radius:10px;width:52px;height:52px;object-fit:cover">` : `<div class="cart-item-img">${p.categories?.emoji||'📦'}</div>`;
+    return `<div class="cart-item">
+      ${imgEl}
+      <div class="cart-item-info">
+        <div class="cart-item-name">${p.name}</div>
+        <div class="cart-item-price">${fmt(p.price_won)} ₩</div>
       </div>
-      <div class="pr">${fmt(p.price_won * q)} ₩</div>
+      <div class="qty-ctrl">
+        <button onclick="chCartQty(${id},-1)">−</button>
+        <span>${q}</span>
+        <button onclick="chCartQty(${id},1)">+</button>
+      </div>
     </div>`;
   }).join('');
-  document.getElementById('t-won').textContent = fmt(cartWon()) + ' ₩';
-  document.getElementById('t-som').textContent = fmt(cartSom()) + " so'm";
+  document.getElementById('ct-won').textContent = fmt(cartWon())+' ₩';
+  document.getElementById('ct-som').textContent = fmt(cartSom())+' so\'m';
 }
 
-// ── ORDER ──
+/* ══════ ORDER ══════ */
 function sendOrder() {
   closeCart();
   document.getElementById('phone-inp').value = '';
-  document.getElementById('overlay2').classList.add('show');
-  document.getElementById('phonesheet').classList.add('show');
-  setTimeout(() => document.getElementById('phone-inp').focus(), 300);
+  showSheet('phone-sheet','ov3');
+  setTimeout(() => document.getElementById('phone-inp').focus(), 400);
 }
-
-function closePhone() {
-  document.getElementById('overlay2').classList.remove('show');
-  document.getElementById('phonesheet').classList.remove('show');
-}
+function closePhone() { hideSheet('phone-sheet','ov3'); }
 
 async function confirmOrder() {
   const phone = document.getElementById('phone-inp').value.trim();
-  if (!phone || phone.length < 7) { alert("Telefon raqamingizni to'g'ri kiriting!"); return; }
-
-  const btn = document.getElementById('confirmbtn');
+  if(!phone || phone.length < 7) { alert("Telefon raqamingizni to'g'ri kiriting!"); return; }
+  const btn = document.getElementById('confirm-btn');
   btn.disabled = true; btn.textContent = '⏳ Yuborilmoqda...';
-
   const tgUser = tg?.initDataUnsafe?.user || {};
-  const orderItems = Object.entries(cart).map(([id, q]) => {
-    const p = prod(id);
-    return { id: Number(id), name: p.name, brand: p.brand, qty: q, price_won: p.price_won, price_som: p.price_som };
-  });
-
+  const items = Object.entries(cart).map(([id,q])=>{const p=prod(id);return{id:+id,name:p.name,brand:p.brand,qty:q,price_won:p.price_won,price_som:p.price_som};});
   try {
-    const saveRes = await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
-      method: 'POST',
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
-      body: JSON.stringify({ user_id: tgUser.id || null, username: tgUser.username || phone, first_name: tgUser.first_name || 'Mijoz', items: { products: orderItems, phone }, total_won: cartWon(), total_som: cartSom(), status: 'new' })
-    });
-    const savedData = await saveRes.json();
-    const orderId = savedData[0]?.id || 0;
-
-    const itemsList = orderItems.map(i => `• ${i.name} x${i.qty} — ${fmt(i.price_won * i.qty)} ₩`).join('\n');
-    const msg = `🛒 YANGI BUYURTMA #${orderId}!\n\n👤 ${tgUser.first_name || 'Mijoz'}${tgUser.username ? ' (@' + tgUser.username + ')' : ''}\n📞 ${phone}\n\n📦 Mahsulotlar:\n${itemsList}\n\n💰 Jami: ${fmt(cartWon())} ₩\n≈ ${fmt(cartSom())} so'm`;
-
-    const keyboard = { inline_keyboard: [[{ text: '✅ Qabul qildim', callback_data: `sq_accept_${orderId}` }, { text: '🚚 Yolda', callback_data: `sq_ship_${orderId}` }], [{ text: '✅ Yetdi', callback_data: `sq_deliver_${orderId}` }, { text: '❌ Bekor', callback_data: `sq_cancel_${orderId}` }]] };
-
-    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: ADMIN_CHAT_ID, text: msg, reply_markup: keyboard })
-    });
-
-    Object.keys(cart).forEach(k => delete cart[k]);
-    updateBar(); closePhone();
-
-    document.getElementById('grid').innerHTML = `
-      <div class="success-box">
-        <div class="icon">✅</div>
-        <div class="title">Buyurtma qabul qilindi!</div>
-        <div class="sub">Tez orada <b>@Tangin_admin</b> siz bilan bog'lanadi.<br>Telefon: ${phone}</div>
-      </div>`;
-    setTimeout(() => renderGrid(), 5000);
-
-  } catch (e) { alert("Xato yuz berdi. Internet aloqasini tekshiring."); }
-
-  btn.disabled = false; btn.textContent = '✅ Tasdiqlash va yuborish';
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/orders`,{method:'POST',headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify({user_id:tgUser.id||null,username:tgUser.username||phone,first_name:tgUser.first_name||'Mijoz',items:{products:items,phone},total_won:cartWon(),total_som:cartSom(),status:'new'})});
+    const saved = await r.json();
+    const orderId = saved[0]?.id||0;
+    const itemsList = items.map(i=>`• ${i.name} x${i.qty} — ${fmt(i.price_won*i.qty)} ₩`).join('\n');
+    const msg = `🛒 YANGI BUYURTMA #${orderId}!\n\n👤 ${tgUser.first_name||'Mijoz'}${tgUser.username?' (@'+tgUser.username+')':''}\n📞 ${phone}\n\n📦 Mahsulotlar:\n${itemsList}\n\n💰 Jami: ${fmt(cartWon())} ₩\n≈ ${fmt(cartSom())} so'm`;
+    const keyboard={inline_keyboard:[[{text:'✅ Qabul qildim',callback_data:`sq_accept_${orderId}`},{text:'🚚 Yolda',callback_data:`sq_ship_${orderId}`}],[{text:'✅ Yetdi',callback_data:`sq_deliver_${orderId}`},{text:'❌ Bekor',callback_data:`sq_cancel_${orderId}`}]]};
+    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:ADMIN_CHAT_ID,text:msg,reply_markup:keyboard})});
+    Object.keys(cart).forEach(k=>delete cart[k]);
+    updateCartBadge(); closePhone();
+    // Show success on home
+    document.getElementById('prod-grid').innerHTML = `<div class="success-wrap"><div class="success-icon">✅</div><div class="success-title">Buyurtma qabul qilindi!</div><div class="success-sub">Tez orada <b>@Tangin_admin</b> bog'lanadi.<br>📞 ${phone}</div></div>`;
+    setTimeout(()=>{ const f=activeCatId===null?allProducts:allProducts.filter(p=>p.category_id==activeCatId); renderProducts(f,'prod-grid'); }, 5000);
+  } catch(e) { alert("Xato yuz berdi. Internet aloqasini tekshiring."); }
+  btn.disabled=false; btn.textContent='✅ Tasdiqlash va yuborish';
 }
 
-
-// ── MY ORDERS ──
-const STATUS_MAP = {
-  new: { label: 'Yangi', cls: 'status-new' },
-  accepted: { label: 'Qabul qilindi', cls: 'status-accepted' },
-  shipping: { label: 'Yolda', cls: 'status-shipping' },
-  delivered: { label: 'Yetkazildi', cls: 'status-delivered' },
-  cancelled: { label: 'Bekor qilindi', cls: 'status-cancelled' },
-};
-
+/* ══════ ORDERS HISTORY ══════ */
 async function openOrders() {
-  document.getElementById('overlay4').classList.add('show');
-  document.getElementById('orderssheet').classList.add('show');
-  const box = document.getElementById('orders-list');
-
+  showSheet('orders-sheet','ov4');
+  const wrap = document.getElementById('orders-wrap');
   const userId = tg?.initDataUnsafe?.user?.id;
-  if (!userId) {
-    box.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);font-size:14px">Buyurtma tarixini ko\'rish uchun shopni Telegram orqali oching.</div>';
+  if(!userId) {
+    wrap.innerHTML = '<div class="empty-state"><div class="es-icon">📱</div><div class="es-text">Telegram orqali oching</div><div class="es-sub">Buyurtma tarixini ko\'rish uchun</div></div>';
     return;
   }
-
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/orders?user_id=eq.${userId}&order=created_at.desc`, {
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-    });
-    const orders = await res.json();
-
-    if (!orders.length) {
-      box.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:14px">Hali buyurtma yo\'q.<br>Birinchi buyurtmangizni bering! 🛒</div>';
+    const orders = await api('orders',`user_id=eq.${userId}&order=created_at.desc`);
+    if(!orders.length) {
+      wrap.innerHTML = '<div class="empty-state"><div class="es-icon">📋</div><div class="es-text">Hali buyurtma yo\'q</div><div class="es-sub">Birinchi buyurtmangizni bering!</div></div>';
       return;
     }
-
-    box.innerHTML = orders.map(o => {
-      const st = STATUS_MAP[o.status] || { label: o.status, cls: 'status-new' };
-      const prods = (o.items?.products || []).map(p => `${p.name} x${p.qty}`).join(', ');
-      const date = new Date(o.created_at).toLocaleDateString('uz-UZ');
+    const stMap={new:{l:'Yangi',c:'st-new'},accepted:{l:'Qabul',c:'st-accepted'},shipping:{l:'Yolda',c:'st-shipping'},delivered:{l:'Yetdi',c:'st-delivered'},cancelled:{l:'Bekor',c:'st-cancelled'}};
+    wrap.innerHTML = orders.map(o=>{
+      const st=stMap[o.status]||{l:o.status,c:'st-new'};
+      const prods=(o.items?.products||[]).map(p=>`${p.name} x${p.qty}`).join(', ');
+      const date=new Date(o.created_at).toLocaleDateString('uz-UZ');
       return `<div class="order-card">
-        <div class="order-card-header">
-          <span class="order-num">#${o.id}</span>
+        <div class="order-card-top">
+          <span class="order-id">#${o.id}</span>
           <span class="order-date">${date}</span>
-          <span class="order-status ${st.cls}">${st.label}</span>
+          <span class="order-st ${st.c}">${st.l}</span>
         </div>
-        <div class="order-items">${prods}</div>
-        <div class="order-total">${fmt(o.total_won)} ₩ · ${fmt(o.total_som)} so'm</div>
+        <div class="order-items-txt">${prods}</div>
+        <div class="order-total-txt">${fmt(o.total_won)} ₩ · ${fmt(o.total_som)} so'm</div>
       </div>`;
     }).join('');
-  } catch(e) {
-    box.innerHTML = '<div style="text-align:center;padding:30px;color:#e53935">Xato yuz berdi. Qayta urinib ko\'ring.</div>';
+  } catch(e) { wrap.innerHTML = '<div class="empty-state"><div class="es-icon">❌</div><div class="es-text">Xato yuz berdi</div></div>'; }
+}
+function closeOrders() { hideSheet('orders-sheet','ov4'); }
+
+/* ══════ PROFILE ══════ */
+function loadProfile() {
+  const u = tg?.initDataUnsafe?.user;
+  if(u) {
+    document.getElementById('prof-name').textContent = (u.first_name||'')+(u.last_name?' '+u.last_name:'');
+    document.getElementById('prof-username').textContent = u.username ? '@'+u.username : 'Telegram foydalanuvchi';
+    document.getElementById('prof-avatar').textContent = (u.first_name||'T')[0].toUpperCase();
   }
 }
 
-function closeOrders() {
-  document.getElementById('overlay4').classList.remove('show');
-  document.getElementById('orderssheet').classList.remove('show');
+/* ══════ SHEETS HELPER ══════ */
+function showSheet(sheetId, ovId) {
+  document.getElementById(ovId).classList.add('show');
+  document.getElementById(sheetId).classList.add('show');
+}
+function hideSheet(sheetId, ovId) {
+  document.getElementById(ovId).classList.remove('show');
+  document.getElementById(sheetId).classList.remove('show');
 }
 
-document.getElementById('q').addEventListener('input', e => {
-  searchQuery = e.target.value.toLowerCase().trim();
-  renderGrid();
-});
-
+/* ══════ START ══════ */
+initTheme();
 init();
 </script>
 </body>
