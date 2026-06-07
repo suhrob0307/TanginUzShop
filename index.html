@@ -49,14 +49,14 @@ body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--ink);tran
 .section-sub{font-size:12px;color:var(--muted);font-weight:600}
 
 /* ═══════════════════════════════════ CATEGORY GRID ════════════════════════ */
-.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:4px 16px 4px}
-.cat-card{background:var(--card);border-radius:14px;padding:14px 8px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;border:2px solid transparent;transition:.15s;box-shadow:var(--shadow)}
+.cat-grid{display:flex;gap:8px;overflow-x:auto;padding:10px 16px;scrollbar-width:none}
+.cat-grid::-webkit-scrollbar{display:none}
+.cat-card{flex:none;display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--card);border-radius:14px;padding:10px 10px 8px;width:66px;cursor:pointer;border:2px solid transparent;transition:.15s;box-shadow:var(--shadow)}
 .cat-card.active{border-color:var(--accent);background:var(--accent-soft)}
-.cat-card .cat-icon{width:52px;height:52px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:24px}
-.cat-card.active .cat-icon{background:var(--accent-soft)}
-.cat-card .cat-name{font-size:11px;font-weight:700;text-align:center;line-height:1.3;color:var(--ink)}
+.cat-card .cat-icon{font-size:22px;line-height:1}
+.cat-card .cat-name{font-size:9.5px;font-weight:700;text-align:center;line-height:1.25;color:var(--ink);width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cat-card.active .cat-name{color:var(--accent)}
-.cat-all .cat-icon{background:var(--accent);color:#fff}
+.cat-all .cat-icon{font-size:22px}
 
 /* ═══════════════════════════════════ PRODUCT GRID ═════════════════════════ */
 .prod-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:4px 16px 16px}
@@ -199,10 +199,6 @@ body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--ink);tran
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
         <input placeholder="Mahsulot qidirish..." readonly style="cursor:pointer">
       </div>
-    </div>
-    <div class="section-header">
-      <span class="section-title">Kategoriyalar</span>
-      <span class="section-sub" id="active-cat-label">Barchasi</span>
     </div>
     <div class="cat-grid" id="cat-grid"><div class="loading-state">Yuklanmoqda...</div></div>
     <div class="section-header" style="margin-top:8px">
