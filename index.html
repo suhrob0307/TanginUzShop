@@ -105,6 +105,19 @@
   .add-to-cart-btn:disabled { opacity: .4; cursor: default; }
 
   .success-box { grid-column: 1/3; text-align: center; padding: 60px 20px; }
+  .my-orders-btn { position: fixed; top: 14px; left: 16px; z-index: 99; background: rgba(0,0,0,0.08); color: #aaa; font-size: 11px; font-weight: 600; padding: 6px 12px; border-radius: 999px; text-decoration: none; cursor: pointer; border: 0; font-family: inherit; }
+  .order-card { background: var(--bg); border-radius: 14px; padding: 14px; margin-bottom: 10px; }
+  .order-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .order-num { font-size: 13px; font-weight: 800; }
+  .order-date { font-size: 11px; color: var(--muted); }
+  .order-status { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
+  .status-new { background: #e3f2fd; color: #1565c0; }
+  .status-accepted { background: #e8f5e9; color: #2e7d32; }
+  .status-shipping { background: #fff3e0; color: #e65100; }
+  .status-delivered { background: #e8f5e9; color: #1b5e20; }
+  .status-cancelled { background: #fce4ec; color: #b71c1c; }
+  .order-items { font-size: 13px; color: var(--muted); margin-bottom: 6px; line-height: 1.5; }
+  .order-total { font-size: 14px; font-weight: 800; }
   .success-box .icon { font-size: 64px; margin-bottom: 16px; }
   .success-box .title { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
   .success-box .sub { color: var(--muted); font-size: 14px; line-height: 1.5; }
@@ -185,6 +198,16 @@
   <button class="close-btn" onclick="closeDetail()">Yopish</button>
 </div>
 
+
+<!-- My Orders sheet -->
+<div class="overlay" id="overlay4" onclick="closeOrders()"></div>
+<div class="sheet" id="orderssheet" style="z-index:75">
+  <h2>📋 Buyurtmalarim</h2>
+  <div id="orders-list"><div style="text-align:center;padding:30px;color:var(--muted)">Yuklanmoqda...</div></div>
+  <button class="close-btn" onclick="closeOrders()">Yopish</button>
+</div>
+
+<button class="my-orders-btn" onclick="openOrders()">📋 Buyurtmalarim</button>
 <a href="admin.html" style="position:fixed;top:14px;right:16px;z-index:99;background:rgba(0,0,0,0.08);color:#aaa;font-size:11px;font-weight:600;padding:6px 12px;border-radius:999px;text-decoration:none">Admin</a>
 
 <script>
@@ -452,6 +475,62 @@ async function confirmOrder() {
   } catch (e) { alert("Xato yuz berdi. Internet aloqasini tekshiring."); }
 
   btn.disabled = false; btn.textContent = '✅ Tasdiqlash va yuborish';
+}
+
+
+// ── MY ORDERS ──
+const STATUS_MAP = {
+  new: { label: 'Yangi', cls: 'status-new' },
+  accepted: { label: 'Qabul qilindi', cls: 'status-accepted' },
+  shipping: { label: 'Yolda', cls: 'status-shipping' },
+  delivered: { label: 'Yetkazildi', cls: 'status-delivered' },
+  cancelled: { label: 'Bekor qilindi', cls: 'status-cancelled' },
+};
+
+async function openOrders() {
+  document.getElementById('overlay4').classList.add('show');
+  document.getElementById('orderssheet').classList.add('show');
+  const box = document.getElementById('orders-list');
+
+  const userId = tg?.initDataUnsafe?.user?.id;
+  if (!userId) {
+    box.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);font-size:14px">Buyurtma tarixini ko\'rish uchun shopni Telegram orqali oching.</div>';
+    return;
+  }
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/orders?user_id=eq.${userId}&order=created_at.desc`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    const orders = await res.json();
+
+    if (!orders.length) {
+      box.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:14px">Hali buyurtma yo\'q.<br>Birinchi buyurtmangizni bering! 🛒</div>';
+      return;
+    }
+
+    box.innerHTML = orders.map(o => {
+      const st = STATUS_MAP[o.status] || { label: o.status, cls: 'status-new' };
+      const prods = (o.items?.products || []).map(p => `${p.name} x${p.qty}`).join(', ');
+      const date = new Date(o.created_at).toLocaleDateString('uz-UZ');
+      return `<div class="order-card">
+        <div class="order-card-header">
+          <span class="order-num">#${o.id}</span>
+          <span class="order-date">${date}</span>
+          <span class="order-status ${st.cls}">${st.label}</span>
+        </div>
+        <div class="order-items">${prods}</div>
+        <div class="order-total">${fmt(o.total_won)} ₩ · ${fmt(o.total_som)} so'm</div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    box.innerHTML = '<div style="text-align:center;padding:30px;color:#e53935">Xato yuz berdi. Qayta urinib ko\'ring.</div>';
+  }
+}
+
+function closeOrders() {
+  document.getElementById('overlay4').classList.remove('show');
+  document.getElementById('orderssheet').classList.remove('show');
 }
 
 document.getElementById('q').addEventListener('input', e => {
