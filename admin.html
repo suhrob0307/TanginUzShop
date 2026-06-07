@@ -87,6 +87,66 @@
   .toggle { display: flex; align-items: center; gap: 10px; }
   .toggle input[type=checkbox] { width: 18px; height: 18px; }
 </style>
+
+<style id="mobile-responsive">
+@media (max-width: 768px) {
+  .sidebar { display: none !important; }
+  .main { margin-left: 0 !important; padding: 10px !important; padding-bottom: 85px !important; }
+  .modal { width: 100% !important; max-width: 100% !important; border-radius: 20px 20px 0 0 !important; margin: 0 !important; max-height: 90vh !important; position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; top: auto !important; }
+  .modal-backdrop { align-items: flex-end !important; padding: 0 !important; }
+  .page-header { flex-wrap: wrap; gap: 8px; padding: 12px 0; }
+  .page-header h1 { font-size: 18px; }
+  .page-header button { font-size: 13px; padding: 8px 14px; }
+  .stats-grid { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+  .stat { padding: 12px !important; }
+  .stat .val { font-size: 20px !important; }
+  .stat .label { font-size: 12px !important; }
+  .card { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { min-width: 520px; font-size: 13px; }
+  th, td { padding: 9px 10px !important; }
+  .prod-img, .prod-img-placeholder { width: 32px !important; height: 32px !important; font-size: 14px !important; }
+  .btn { padding: 8px 14px !important; font-size: 13px !important; }
+  .btn-sm { padding: 5px 10px !important; font-size: 12px !important; }
+  .form-group label { font-size: 13px !important; }
+  .form-group input, .form-group select, .form-group textarea { font-size: 14px !important; padding: 10px 12px !important; }
+  .upload-area { padding: 14px !important; font-size: 12px !important; }
+  .mobile-topbar { display: flex !important; }
+  .mobile-nav { display: block !important; }
+}
+.mobile-topbar {
+  display: none;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  padding: 13px 16px;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+}
+.m-brand { font-weight: 800; font-size: 16px; color: #2d3436; }
+.m-brand span { color: #1f6f4a; }
+.m-logout-btn { background: #fff0f0; border: 0; border-radius: 8px; padding: 6px 12px; color: #e74c3c; font-weight: 700; font-size: 13px; cursor: pointer; font-family: inherit; }
+.mobile-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-top: 1px solid #eee;
+  z-index: 200;
+  padding: 6px 0 calc(6px + env(safe-area-inset-bottom));
+}
+.mobile-nav-row { display: flex; justify-content: space-around; }
+.m-nav-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  border: 0; background: transparent; color: #999; font-size: 10px;
+  font-weight: 700; cursor: pointer; padding: 4px 10px; font-family: inherit;
+}
+.m-nav-btn .m-icon { font-size: 21px; line-height: 1; }
+.m-nav-btn.active { color: #1f6f4a; }
+</style>
 </head>
 <body>
 
@@ -535,6 +595,49 @@ async function updateOrderStatus(id, status) {
   await patch('orders', id, { status });
   loadDashboard();
 }
+</script>
+
+<div class="mobile-topbar" id="mobileTopbar">
+  <div class="m-brand">TanginUz <span>Admin</span></div>
+  <button class="m-logout-btn" onclick="doLogout()">Chiqish</button>
+</div>
+<div class="mobile-nav" id="mobileNav">
+  <div class="mobile-nav-row">
+    <button class="m-nav-btn active" id="mn-dashboard" onclick="mNav('dashboard')"><span class="m-icon">📊</span><span>Bosh</span></button>
+    <button class="m-nav-btn" id="mn-categories" onclick="mNav('categories')"><span class="m-icon">📁</span><span>Kategoriya</span></button>
+    <button class="m-nav-btn" id="mn-products" onclick="mNav('products')"><span class="m-icon">📦</span><span>Mahsulot</span></button>
+    <button class="m-nav-btn" id="mn-orders" onclick="mNav('orders')"><span class="m-icon">🛒</span><span>Buyurtma</span></button>
+  </div>
+</div>
+
+<script id="mobile-js">
+function isMobile() { return window.innerWidth <= 768; }
+function mNav(page) {
+  if(typeof showPage === 'function') showPage(page);
+  ['dashboard','categories','products','orders'].forEach(function(p) {
+    var btn = document.getElementById('mn-' + p);
+    if(btn) btn.classList.toggle('active', p === page);
+  });
+}
+function doLogout() {
+  var app = document.getElementById('app');
+  var login = document.getElementById('login');
+  if(app) app.style.display = 'none';
+  if(login) login.style.display = 'flex';
+}
+function initMobile() {
+  var topbar = document.getElementById('mobileTopbar');
+  var nav = document.getElementById('mobileNav');
+  if(isMobile()) {
+    if(topbar) topbar.style.display = 'flex';
+    if(nav) nav.style.display = 'block';
+  } else {
+    if(topbar) topbar.style.display = 'none';
+    if(nav) nav.style.display = 'none';
+  }
+}
+window.addEventListener('resize', initMobile);
+window.addEventListener('load', function() { setTimeout(initMobile, 300); });
 </script>
 </body>
 </html>
