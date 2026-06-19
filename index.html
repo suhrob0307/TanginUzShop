@@ -82,6 +82,11 @@ body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--ink);tran
 .prod-som{font-size:11px;color:var(--muted);font-weight:600}
 .prod-stock{align-self:flex-start;margin-top:4px;font-size:10px;font-weight:700;color:var(--accent);background:var(--accent-soft);padding:2px 8px;border-radius:999px}
 .prod-stock.out{color:#e53935;background:#fde8e8}
+.prod-actions{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.pcard-btn{width:100%;border:0;border-radius:10px;padding:9px 4px;font-family:inherit;font-size:11.5px;font-weight:700;cursor:pointer;transition:.15s}
+.pcard-btn:disabled{opacity:.5;cursor:default}
+.pcard-btn.primary{background:var(--accent);color:#fff}
+.pcard-btn.outline{background:transparent;border:1.5px solid var(--line);color:var(--ink)}
 
 /* ═══════════════════════════════════ BOTTOM NAV ════════════════════════════ */
 .bottom-nav{position:fixed;left:0;right:0;bottom:0;height:70px;background:var(--nav);border-top:1px solid var(--nav-line);display:flex;align-items:center;justify-content:space-around;z-index:100;padding:0 4px calc(4px + env(safe-area-inset-bottom))}
@@ -653,6 +658,7 @@ function prodCardHTML(p, i) {
     ? `<img src="${p.photo_url}" alt="${p.name}" loading="lazy">`
     : `<div class="prod-ph">${p.categories?.emoji||'📦'}</div>`;
   const inCart = cart[p.id] ? `<div class="prod-stock">🛒 ${cart[p.id]} ta</div>` : (p.in_stock ? `<div class="prod-stock">${t('instock')}</div>` : `<div class="prod-stock out">${t('outstock')}</div>`);
+  const dis = p.in_stock ? '' : 'disabled';
   return `<div class="prod-card" style="animation-delay:${i*.04}s" onclick="openDetail(${p.id})">
     <div class="prod-thumb">
       ${img}
@@ -665,6 +671,10 @@ function prodCardHTML(p, i) {
       <div class="prod-won">${fmt(p.price_won)} <small>₩</small></div>
       <div class="prod-som">${fmt(p.price_som)} so'm</div>
       ${inCart}
+      <div class="prod-actions">
+        <button class="pcard-btn primary" ${dis} onclick="quickAdd(event,${p.id})">🛒 Savatga qo'shish</button>
+        <button class="pcard-btn outline" ${dis} onclick="quickOrder(event,${p.id})">✍️ Sotuvchiga yozish</button>
+      </div>
     </div>
   </div>`;
 }
@@ -676,6 +686,22 @@ function renderProducts(list, containerId) {
     return;
   }
   box.innerHTML = list.map((p,i) => prodCardHTML(p,i)).join('');
+}
+
+function quickAdd(e, id) {
+  e.stopPropagation();
+  cart[id] = (cart[id]||0) + 1;
+  updateCartBadge();
+  const filtered = activeCatId === null ? allProducts : allProducts.filter(p => p.category_id == activeCatId);
+  renderProducts(filtered, 'prod-grid');
+  if(tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+}
+
+function quickOrder(e, id) {
+  e.stopPropagation();
+  cart[id] = cart[id] || 1;
+  updateCartBadge();
+  sendOrder();
 }
 
 /* ══════ FAVORITES ══════ */
