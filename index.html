@@ -632,7 +632,6 @@ function renderCategories() {
 
 function selectCat(id, name) {
   activeCatId = id;
-  document.getElementById('active-cat-label').textContent = name;
   renderCategories();
   const filtered = id === null ? allProducts : allProducts.filter(p => p.category_id == id);
   renderProducts(filtered, 'prod-grid');
