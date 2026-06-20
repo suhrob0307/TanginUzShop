@@ -298,6 +298,12 @@ body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--ink);tran
         <span class="menu-item-right">›</span>
       </div>
     </div>
+    <div class="menu-section" id="pwa-install-wrap" style="display:none">
+      <div class="menu-item" id="pwa-install-btn" onclick="installPWA()">
+        <span><span class="menu-item-icon">📲</span><span id="pwa-install-label">Ilovani telefonga o'rnatish</span></span>
+        <span class="menu-item-right">›</span>
+      </div>
+    </div>
     <div class="menu-section">
       <div style="padding:14px 18px">
         <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px">🌐 TIL / ЯЗЫК / 언어 / LANGUAGE</div>
@@ -439,6 +445,7 @@ const LANG = {
     profile_title:"👤 Profil",orders_menu:"Buyurtmalar tarixi",
     theme_dark:"Qora tema",theme_light:"Yoriq tema",admin:"Admin panel",
     qa_admin:"Admin",qa_shop:"Tangin Shop",qa_call:"Qo'ng'iroq",
+    pwa_install:"Ilovani telefonga o'rnatish",pwa_ios_hint:"O'rnatish uchun: pastdagi \"Share\" (ulashish) tugmasini bosing, so'ng \"Add to Home Screen\" ni tanlang.",
     nav_home:"Bosh",nav_search:"Qidiruv",nav_fav:"Sevimlilar",nav_profile:"Profil",
     success_title:"Buyurtma qabul qilindi!",success_sub:"Tez orada bog'lanamiz.",
     no_prods:"Mahsulot topilmadi",loading:"Yuklanmoqda...",
@@ -464,6 +471,7 @@ const LANG = {
     profile_title:"👤 Профиль",orders_menu:"История заказов",
     theme_dark:"Тёмная тема",theme_light:"Светлая тема",admin:"Администратор",
     qa_admin:"Админ",qa_shop:"Tangin Shop",qa_call:"Звонок",
+    pwa_install:"Установить приложение",pwa_ios_hint:"Чтобы установить: нажмите кнопку \"Share\" (поделиться) внизу, затем выберите \"Add to Home Screen\".",
     nav_home:"Главная",nav_search:"Поиск",nav_fav:"Избранное",nav_profile:"Профиль",
     success_title:"Заказ принят!",success_sub:"Скоро свяжемся с вами.",
     no_prods:"Товары не найдены",loading:"Загрузка...",
@@ -489,6 +497,7 @@ const LANG = {
     profile_title:"👤 프로필",orders_menu:"주문 내역",
     theme_dark:"다크 모드",theme_light:"라이트 모드",admin:"관리자",
     qa_admin:"관리자",qa_shop:"Tangin Shop",qa_call:"전화",
+    pwa_install:"앱을 휴대폰에 설치하기",pwa_ios_hint:"설치하려면: 아래 \"공유(Share)\" 버튼을 누른 후 \"홈 화면에 추가\"를 선택하세요.",
     nav_home:"홈",nav_search:"검색",nav_fav:"즐겨찾기",nav_profile:"프로필",
     success_title:"주문이 완료되었습니다!",success_sub:"@Tangin_admin이 곧 연락드립니다.",
     no_prods:"상품을 찾을 수 없습니다",loading:"로딩 중...",
@@ -514,6 +523,7 @@ const LANG = {
     profile_title:"👤 Profile",orders_menu:"Order history",
     theme_dark:"Dark mode",theme_light:"Light mode",admin:"Admin panel",
     qa_admin:"Admin",qa_shop:"Tangin Shop",qa_call:"Call",
+    pwa_install:"Install app to phone",pwa_ios_hint:"To install: tap the \"Share\" button below, then choose \"Add to Home Screen\".",
     nav_home:"Home",nav_search:"Search",nav_fav:"Favorites",nav_profile:"Profile",
     success_title:"Order placed!",success_sub:"@Tangin_admin will contact you soon.",
     no_prods:"No products found",loading:"Loading...",
@@ -562,6 +572,7 @@ function setLang(lang) {
     'qa-admin-label': ['text', t('qa_admin')],
     'qa-shop-label': ['text', t('qa_shop')],
     'qa-call-label': ['text', t('qa_call')],
+    'pwa-install-label': ['text', t('pwa_install')],
     'cart-close-btn': ['text', t('close_btn')],
     'orders-close-btn': ['text', t('close_btn')],
     'detail-close-btn': ['text', t('close_btn')],
@@ -982,6 +993,43 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   });
+}
+
+/* ══════ PWA INSTALL ══════ */
+let deferredInstallPrompt = null;
+const isStandaloneApp = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+const isInTelegram = !!(tg && tg.initData);
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+
+function showInstallBanner() {
+  if (isInTelegram || isStandaloneApp) return;
+  const wrap = document.getElementById('pwa-install-wrap');
+  if (wrap) wrap.style.display = '';
+}
+
+function installPWA() {
+  if (deferredInstallPrompt) {
+    deferredInstallPrompt.prompt();
+    deferredInstallPrompt.userChoice.finally(() => { deferredInstallPrompt = null; });
+  } else if (isIOS) {
+    alert(t('pwa_ios_hint'));
+  }
+}
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  showInstallBanner();
+});
+
+window.addEventListener('appinstalled', () => {
+  deferredInstallPrompt = null;
+  const wrap = document.getElementById('pwa-install-wrap');
+  if (wrap) wrap.style.display = 'none';
+});
+
+if (isIOS && !isInTelegram && !isStandaloneApp) {
+  showInstallBanner();
 }
 </script>
 </body>
