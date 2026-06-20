@@ -283,10 +283,6 @@ body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--ink);tran
       </div>
     </div>
     <div class="menu-section">
-      <div class="menu-item" onclick="openOrders()">
-        <span><span class="menu-item-icon">📋</span><span id="orders-menu-label">Buyurtmalar tarixi</span></span>
-        <span class="menu-item-right">›</span>
-      </div>
       <div class="menu-item" onclick="toggleTheme()">
         <span><span class="menu-item-icon" id="theme-menu-icon">🌙</span><span id="theme-menu-label">Qora tema</span></span>
         <span class="menu-item-right">›</span>
@@ -363,8 +359,6 @@ body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--ink);tran
 <!-- ═══════════ OVERLAYS ═══════════ -->
 <div class="overlay" id="ov1" onclick="closeCart()"></div>
 <div class="overlay" id="ov2" onclick="closeDetail()"></div>
-<div class="overlay" id="ov3" onclick="closePhone()"></div>
-<div class="overlay" id="ov4" onclick="closeOrders()"></div>
 
 <!-- ═══════════ CART SHEET ═══════════ -->
 <div class="sheet" id="cart-sheet">
@@ -406,25 +400,6 @@ body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--ink);tran
   <button class="btn-secondary" id="detail-close-btn" onclick="closeDetail()">Yopish</button>
 </div>
 
-<!-- ═══════════ PHONE SHEET ═══════════ -->
-<div class="sheet" id="phone-sheet" style="z-index:130">
-  <div class="sheet-handle"></div>
-  <div class="sheet-title" id="phone-sheet-title">📞 Telefon raqam</div>
-  <p id="phone-hint" style="color:var(--muted);font-size:14px;margin-bottom:16px;line-height:1.5">Tez orada siz bilan bog'lanamiz!</p>
-  <div class="phone-inp-wrap">
-    <span style="font-size:22px">📱</span>
-    <input id="phone-inp" type="tel" placeholder="+998 90 123 45 67" inputmode="tel">
-  </div>
-  <button class="btn-primary" id="confirm-btn" onclick="confirmOrder()">✅ Tasdiqlash va yuborish</button>
-  <button class="btn-secondary" id="cancel-phone-btn" onclick="closePhone()">Bekor qilish</button>
-</div>
-
-<!-- ═══════════ ORDERS SHEET ═══════════ -->
-<div class="sheet" id="orders-sheet" style="z-index:135">
-  <div class="sheet-handle"></div>
-  <div class="sheet-title" id="orders-sheet-title">📋 Buyurtmalar tarixi</div>
-  <div id="orders-wrap"><div class="loading-state">Yuklanmoqda...</div></div>
-  <button class="btn-secondary" id="orders-close-btn" onclick="closeOrders()">Yopish</button>
 </div>
 
 <script>
@@ -435,108 +410,72 @@ const LANG = {
     search:"Mahsulot qidirish...",all:"Barchasi",instock:'Mavjud',outstock:'Tugagan',
     addcart:"Savatga qo'shish",added:"Qo'shildi",cart:"🛒 Savat",total:"Jami:",
     order:"📦 Buyurtma berish",close:"Yopish",qty:"Miqdor:",
-    phone_title:"📞 Telefon raqam",phone_ph:"+998 90 123 45 67",
-    phone_hint:"Tez orada siz bilan bog'lanamiz!",
-    confirm:"✅ Tasdiqlash va yuborish",cancel:"Bekor qilish",
-    orders_title:"📋 Buyurtmalar tarixi",fav_title:"❤️ Sevimlilar",
+    fav_title:"❤️ Sevimlilar",
     fav_empty:"Sevimlilar bo'sh",fav_hint:"Mahsulot kartasidagi 🤍 ni bosing",
     search_page:"🔍 Qidiruv",search_ph:"Mahsulot nomini yozing...",
     search_empty:"Qidirish uchun yozing",search_hint:"Mahsulot nomi yoki brend",
-    profile_title:"👤 Profil",orders_menu:"Buyurtmalar tarixi",
+    profile_title:"👤 Profil",
     theme_dark:"Qora tema",theme_light:"Yoriq tema",admin:"Admin panel",
     qa_admin:"Admin",qa_shop:"Tangin Shop",qa_call:"Qo'ng'iroq",
     pwa_install:"Ilovani telefonga o'rnatish",pwa_ios_hint:"O'rnatish uchun: pastdagi \"Share\" (ulashish) tugmasini bosing, so'ng \"Add to Home Screen\" ni tanlang.",
     pwa_tg_hint:"O'rnatish ochilmadi. Telegram ilovangizni eng so'nggi versiyaga yangilang, so'ng yana urinib ko'ring.",
     nav_home:"Bosh",nav_search:"Qidiruv",nav_fav:"Sevimlilar",nav_profile:"Profil",
-    success_title:"Buyurtma qabul qilindi!",success_sub:"Tez orada bog'lanamiz.",
     no_prods:"Mahsulot topilmadi",loading:"Yuklanmoqda...",
-    no_orders:"Hali buyurtma yo'q",no_orders_hint:"Birinchi buyurtmangizni bering!",
-    open_tg:"Telegram orqali oching",open_tg_hint:"Buyurtma tarixini ko'rish uchun",
     cart_empty:"Savat bo'sh",cart_empty_hint:"Mahsulotlarni savatga qo'shing",
-    sending:"⏳ Yuborilmoqda...",phone_err:"Telefon raqamingizni to'g'ri kiriting!",
-    net_err:"Xato yuz berdi. Internet aloqasini tekshiring.",
-    st_new:"Yangi",st_accepted:"Qabul",st_shipping:"Yolda",st_delivered:"Yetdi",st_cancelled:"Bekor",
     contact:"Bog'lanish",close_btn:"Yopish",welcome:"Xush kelibsiz!"
   },
   ru: {
     search:"Поиск товара...",all:"Все",instock:"В наличии",outstock:"Нет в наличии",
     addcart:"В корзину",added:"Добавлено",cart:"🛒 Корзина",total:"Итого:",
     order:"📦 Оформить заказ",close:"Закрыть",qty:"Количество:",
-    phone_title:"📞 Номер телефона",phone_ph:"+998 90 123 45 67",
-    phone_hint:"Свяжемся с вами в ближайшее время!",
-    confirm:"✅ Подтвердить и отправить",cancel:"Отмена",
-    orders_title:"📋 История заказов",fav_title:"❤️ Избранное",
+    fav_title:"❤️ Избранное",
     fav_empty:"Избранное пусто",fav_hint:"Нажмите 🤍 на карточке товара",
     search_page:"🔍 Поиск",search_ph:"Введите название товара...",
     search_empty:"Введите запрос для поиска",search_hint:"Название или бренд",
-    profile_title:"👤 Профиль",orders_menu:"История заказов",
+    profile_title:"👤 Профиль",
     theme_dark:"Тёмная тема",theme_light:"Светлая тема",admin:"Администратор",
     qa_admin:"Админ",qa_shop:"Tangin Shop",qa_call:"Звонок",
     pwa_install:"Установить приложение",pwa_ios_hint:"Чтобы установить: нажмите кнопку \"Share\" (поделиться) внизу, затем выберите \"Add to Home Screen\".",
     pwa_tg_hint:"Установка не открылась. Обновите Telegram до последней версии и попробуйте снова.",
     nav_home:"Главная",nav_search:"Поиск",nav_fav:"Избранное",nav_profile:"Профиль",
-    success_title:"Заказ принят!",success_sub:"Скоро свяжемся с вами.",
     no_prods:"Товары не найдены",loading:"Загрузка...",
-    no_orders:"Заказов пока нет",no_orders_hint:"Сделайте первый заказ!",
-    open_tg:"Откройте через Telegram",open_tg_hint:"Для просмотра истории заказов",
     cart_empty:"Корзина пуста",cart_empty_hint:"Добавьте товары в корзину",
-    sending:"⏳ Отправляется...",phone_err:"Введите правильный номер телефона!",
-    net_err:"Ошибка. Проверьте подключение к интернету.",
-    st_new:"Новый",st_accepted:"Принят",st_shipping:"В пути",st_delivered:"Доставлен",st_cancelled:"Отменён",
     contact:"Контакты",close_btn:"Закрыть",welcome:"Добро пожаловать!"
   },
   ko: {
     search:"상품 검색...",all:"전체",instock:"재고 있음",outstock:"품절",
     addcart:"장바구니에 추가",added:"추가됨",cart:"🛒 장바구니",total:"합계:",
     order:"📦 주문하기",close:"닫기",qty:"수량:",
-    phone_title:"📞 전화번호",phone_ph:"+998 90 123 45 67",
-    phone_hint:"곧 연락드리겠습니다!",
-    confirm:"✅ 확인 및 전송",cancel:"취소",
-    orders_title:"📋 주문 내역",fav_title:"❤️ 즐겨찾기",
+    fav_title:"❤️ 즐겨찾기",
     fav_empty:"즐겨찾기가 비어 있습니다",fav_hint:"상품 카드의 🤍를 누르세요",
     search_page:"🔍 검색",search_ph:"상품명을 입력하세요...",
     search_empty:"검색어를 입력하세요",search_hint:"상품명 또는 브랜드",
-    profile_title:"👤 프로필",orders_menu:"주문 내역",
+    profile_title:"👤 프로필",
     theme_dark:"다크 모드",theme_light:"라이트 모드",admin:"관리자",
     qa_admin:"관리자",qa_shop:"Tangin Shop",qa_call:"전화",
     pwa_install:"앱을 휴대폰에 설치하기",pwa_ios_hint:"설치하려면: 아래 \"공유(Share)\" 버튼을 누른 후 \"홈 화면에 추가\"를 선택하세요.",
     pwa_tg_hint:"설치 창이 열리지 않았습니다. Telegram 앱을 최신 버전으로 업데이트한 후 다시 시도해 주세요.",
     nav_home:"홈",nav_search:"검색",nav_fav:"즐겨찾기",nav_profile:"프로필",
-    success_title:"주문이 완료되었습니다!",success_sub:"@Tangin_admin이 곧 연락드립니다.",
     no_prods:"상품을 찾을 수 없습니다",loading:"로딩 중...",
-    no_orders:"주문 내역이 없습니다",no_orders_hint:"첫 번째 주문을 해보세요!",
-    open_tg:"Telegram으로 열기",open_tg_hint:"주문 내역을 보려면",
     cart_empty:"장바구니가 비어 있습니다",cart_empty_hint:"상품을 추가하세요",
-    sending:"⏳ 전송 중...",phone_err:"올바른 전화번호를 입력하세요!",
-    net_err:"오류 발생. 인터넷 연결을 확인하세요.",
-    st_new:"신규",st_accepted:"수락됨",st_shipping:"배송 중",st_delivered:"배달됨",st_cancelled:"취소됨",
     contact:"연락처",close_btn:"닫기",welcome:"환영합니다!"
   },
   en: {
     search:"Search products...",all:"All",instock:"In stock",outstock:"Out of stock",
     addcart:"Add to cart",added:"Added",cart:"🛒 Cart",total:"Total:",
     order:"📦 Place order",close:"Close",qty:"Quantity:",
-    phone_title:"📞 Phone number",phone_ph:"+998 90 123 45 67",
-    phone_hint:"We'll contact you soon!",
-    confirm:"✅ Confirm & send",cancel:"Cancel",
-    orders_title:"📋 Order history",fav_title:"❤️ Favorites",
+    fav_title:"❤️ Favorites",
     fav_empty:"Favorites is empty",fav_hint:"Tap 🤍 on a product card",
     search_page:"🔍 Search",search_ph:"Type product name...",
     search_empty:"Type to search",search_hint:"Product name or brand",
-    profile_title:"👤 Profile",orders_menu:"Order history",
+    profile_title:"👤 Profile",
     theme_dark:"Dark mode",theme_light:"Light mode",admin:"Admin panel",
     qa_admin:"Admin",qa_shop:"Tangin Shop",qa_call:"Call",
     pwa_install:"Install app to phone",pwa_ios_hint:"To install: tap the \"Share\" button below, then choose \"Add to Home Screen\".",
     pwa_tg_hint:"Install didn't open. Please update Telegram to the latest version and try again.",
     nav_home:"Home",nav_search:"Search",nav_fav:"Favorites",nav_profile:"Profile",
-    success_title:"Order placed!",success_sub:"@Tangin_admin will contact you soon.",
     no_prods:"No products found",loading:"Loading...",
-    no_orders:"No orders yet",no_orders_hint:"Place your first order!",
-    open_tg:"Open via Telegram",open_tg_hint:"To view order history",
     cart_empty:"Cart is empty",cart_empty_hint:"Add products to cart",
-    sending:"⏳ Sending...",phone_err:"Please enter a valid phone number!",
-    net_err:"Error occurred. Check your internet connection.",
-    st_new:"New",st_accepted:"Accepted",st_shipping:"Shipping",st_delivered:"Delivered",st_cancelled:"Cancelled",
     contact:"Contact",close_btn:"Close",welcome:"Welcome!"
   }
 };
@@ -560,17 +499,10 @@ function setLang(lang) {
     'nav-fav-label': ['text', t('nav_fav')],
     'nav-profile-label': ['text', t('nav_profile')],
     'cart-sheet-title': ['text', t('cart')],
-    'phone-sheet-title': ['text', t('phone_title')],
-    'phone-inp': ['placeholder', t('phone_ph')],
-    'phone-hint': ['text', t('phone_hint')],
-    'confirm-btn': ['text', t('confirm')],
-    'cancel-phone-btn': ['text', t('cancel')],
-    'orders-sheet-title': ['text', t('orders_title')],
     'fav-page-title': ['text', t('fav_title')],
     'search-page-title': ['text', t('search_page')],
     'search-page-input': ['placeholder', t('search_ph')],
     'profile-page-title': ['text', t('profile_title')],
-    'orders-menu-label': ['text', t('orders_menu')],
     'theme-menu-label': ['text', document.documentElement.getAttribute('data-theme') === 'dark' ? t('theme_light') : t('theme_dark')],
     'admin-menu-label': ['text', t('admin')],
     'qa-admin-label': ['text', t('qa_admin')],
@@ -578,7 +510,6 @@ function setLang(lang) {
     'qa-call-label': ['text', t('qa_call')],
     'pwa-install-label': ['text', t('pwa_install')],
     'cart-close-btn': ['text', t('close_btn')],
-    'orders-close-btn': ['text', t('close_btn')],
     'detail-close-btn': ['text', t('close_btn')],
     'detail-qty-label': ['text', t('qty')],
     'order-btn': ['text', t('order')],
@@ -608,8 +539,6 @@ function initLang() {
 
 const SUPABASE_URL = 'https://giggypnwidjnpusyonoo.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_-nSUhJj2p45Xm3V0Kqr-Rw_Ym1h0uBL';
-const BOT_TOKEN = '8855595468:AAGjjgDc-jIA12WZvbkbGfy_T7rNiyHDIP0';
-const ADMIN_CHAT_ID = '6750264043';
 
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
@@ -763,9 +692,9 @@ function quickAdd(e, id) {
 
 function quickOrder(e, id) {
   e.stopPropagation();
-  cart[id] = cart[id] || 1;
-  updateCartBadge();
-  sendOrder();
+  const p = prod(id);
+  if(!p) return;
+  openAdminChat(buildOrderText([{name:p.name, qty:1, price_won:p.price_won}], p.price_won, p.price_som));
 }
 
 /* ══════ FAVORITES ══════ */
@@ -908,72 +837,26 @@ function renderCart() {
   document.getElementById('ct-som').textContent = fmt(cartSom())+' so\'m';
 }
 
-/* ══════ ORDER ══════ */
+/* ══════ ORDER (admin chat handoff) ══════ */
+function buildOrderText(items, totalWon, totalSom) {
+  const itemsList = items.map(i=>`• ${i.name} x${i.qty} — ${fmt(i.price_won*i.qty)} ₩`).join('\n');
+  return `Salom! Quyidagi mahsulot(lar) bilan qiziqyapman:\n\n${itemsList}\n\n💰 Jami: ${fmt(totalWon)} ₩ ≈ ${fmt(totalSom)} so'm`;
+}
+
+function openAdminChat(text) {
+  const url = 'https://t.me/Hadiya_korea_admin?text=' + encodeURIComponent(text);
+  if (tg && tg.openTelegramLink) tg.openTelegramLink(url);
+  else window.open(url, '_blank');
+}
+
 function sendOrder() {
+  const items = Object.entries(cart).map(([id,q])=>{const p=prod(id);return{id:+id,name:p.name,qty:q,price_won:p.price_won,price_som:p.price_som};});
+  if(!items.length) return;
+  openAdminChat(buildOrderText(items, cartWon(), cartSom()));
+  Object.keys(cart).forEach(k=>delete cart[k]);
+  updateCartBadge();
   closeCart();
-  document.getElementById('phone-inp').value = '';
-  showSheet('phone-sheet','ov3');
-  setTimeout(() => document.getElementById('phone-inp').focus(), 400);
 }
-function closePhone() { hideSheet('phone-sheet','ov3'); }
-
-async function confirmOrder() {
-  const phone = document.getElementById('phone-inp').value.trim();
-  if(!phone || phone.length < 7) { safeAlert(t('phone_err')); return; }
-  const btn = document.getElementById('confirm-btn');
-  btn.disabled = true; btn.textContent = t('sending');
-  const tgUser = tg?.initDataUnsafe?.user || {};
-  const items = Object.entries(cart).map(([id,q])=>{const p=prod(id);return{id:+id,name:p.name,brand:p.brand,qty:q,price_won:p.price_won,price_som:p.price_som};});
-  try {
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/orders`,{method:'POST',headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify({user_id:tgUser.id||null,username:tgUser.username||phone,first_name:tgUser.first_name||'Mijoz',items:{products:items,phone},total_won:cartWon(),total_som:cartSom(),status:'new'})});
-    const saved = await r.json();
-    const orderId = saved[0]?.id||0;
-    const itemsList = items.map(i=>`• ${i.name} x${i.qty} — ${fmt(i.price_won*i.qty)} ₩`).join('\n');
-    const msg = `🛒 YANGI BUYURTMA #${orderId}!\n\n👤 ${tgUser.first_name||'Mijoz'}${tgUser.username?' (@'+tgUser.username+')':''}\n📞 ${phone}\n\n📦 Mahsulotlar:\n${itemsList}\n\n💰 Jami: ${fmt(cartWon())} ₩\n≈ ${fmt(cartSom())} so'm`;
-    const keyboard={inline_keyboard:[[{text:'✅ Qabul qildim',callback_data:`sq_accept_${orderId}`},{text:'🚚 Yolda',callback_data:`sq_ship_${orderId}`}],[{text:'✅ Yetdi',callback_data:`sq_deliver_${orderId}`},{text:'❌ Bekor',callback_data:`sq_cancel_${orderId}`}]]};
-    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:ADMIN_CHAT_ID,text:msg,reply_markup:keyboard})});
-    Object.keys(cart).forEach(k=>delete cart[k]);
-    updateCartBadge(); closePhone();
-    // Show success on home
-    document.getElementById('prod-grid').innerHTML = `<div class="success-wrap"><div class="success-icon">✅</div><div class="success-title">Buyurtma qabul qilindi!</div><div class="success-sub">Tez orada <b>@Tangin_admin</b> bog'lanadi.<br>📞 ${phone}</div></div>`;
-    setTimeout(()=>{ const f=activeCatId===null?allProducts:allProducts.filter(p=>p.category_id==activeCatId); renderProducts(f,'prod-grid'); }, 5000);
-  } catch(e) { safeAlert(t('net_err')); }
-  btn.disabled=false; btn.textContent='✅ Tasdiqlash va yuborish';
-}
-
-/* ══════ ORDERS HISTORY ══════ */
-async function openOrders() {
-  showSheet('orders-sheet','ov4');
-  const wrap = document.getElementById('orders-wrap');
-  const userId = tg?.initDataUnsafe?.user?.id;
-  if(!userId) {
-    wrap.innerHTML = '<div class="empty-state"><div class="es-icon">📱</div><div class="es-text">Telegram orqali oching</div><div class="es-sub">Buyurtma tarixini ko\'rish uchun</div></div>';
-    return;
-  }
-  try {
-    const orders = await api('orders',`user_id=eq.${userId}&order=created_at.desc`);
-    if(!orders.length) {
-      wrap.innerHTML = '<div class="empty-state"><div class="es-icon">📋</div><div class="es-text">Hali buyurtma yo\'q</div><div class="es-sub">Birinchi buyurtmangizni bering!</div></div>';
-      return;
-    }
-    const stMap={new:{l:'Yangi',c:'st-new'},accepted:{l:'Qabul',c:'st-accepted'},shipping:{l:'Yolda',c:'st-shipping'},delivered:{l:'Yetdi',c:'st-delivered'},cancelled:{l:'Bekor',c:'st-cancelled'}};
-    wrap.innerHTML = orders.map(o=>{
-      const st=stMap[o.status]||{l:o.status,c:'st-new'};
-      const prods=(o.items?.products||[]).map(p=>`${p.name} x${p.qty}`).join(', ');
-      const date=new Date(o.created_at).toLocaleDateString('uz-UZ');
-      return `<div class="order-card">
-        <div class="order-card-top">
-          <span class="order-id">#${o.id}</span>
-          <span class="order-date">${date}</span>
-          <span class="order-st ${st.c}">${st.l}</span>
-        </div>
-        <div class="order-items-txt">${prods}</div>
-        <div class="order-total-txt">${fmt(o.total_won)} ₩ · ${fmt(o.total_som)} so'm</div>
-      </div>`;
-    }).join('');
-  } catch(e) { wrap.innerHTML = '<div class="empty-state"><div class="es-icon">❌</div><div class="es-text">Xato yuz berdi</div></div>'; }
-}
-function closeOrders() { hideSheet('orders-sheet','ov4'); }
 
 /* ══════ PROFILE ══════ */
 function loadProfile() {
