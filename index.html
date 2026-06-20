@@ -110,6 +110,13 @@ body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--ink);tran
 .menu-item-icon{margin-right:10px;font-size:18px}
 .menu-item-right{color:var(--muted);font-size:18px}
 .prof-about{margin:0 16px 24px;text-align:center;color:var(--muted);font-size:13px;line-height:2}
+.flag-btn{border:1.5px solid var(--line);background:transparent;padding:5px 8px;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.1s}
+.flag-btn img{width:22px;height:16px;border-radius:2px;display:block;object-fit:cover}
+.flag-btn.active{border-color:var(--accent);background:rgba(56,168,113,.12)}
+.quick-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:14px}
+.qa-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 4px;border-radius:12px;background:var(--bg);color:var(--ink);text-decoration:none;font-size:12px;font-weight:700;text-align:center}
+.qa-btn:active{background:var(--line)}
+.qa-icon{font-size:20px}
 
 /* ═══════════════════════════════════ SEARCH PAGE ══════════════════════════ */
 .search-page-header{padding:16px 16px 12px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
@@ -282,12 +289,28 @@ body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--ink);tran
     <div class="menu-section">
       <div style="padding:14px 18px">
         <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px">🌐 TIL / ЯЗЫК / 언어 / LANGUAGE</div>
-        <div style="display:flex;gap:10px">
-          <button class="flag-btn active" id="flag-uz" onclick="setLang('uz')" style="font-size:24px;padding:6px 10px;border-radius:12px">🇺🇿</button>
-          <button class="flag-btn" id="flag-ru" onclick="setLang('ru')" style="font-size:24px;padding:6px 10px;border-radius:12px">🇷🇺</button>
-          <button class="flag-btn" id="flag-ko" onclick="setLang('ko')" style="font-size:24px;padding:6px 10px;border-radius:12px">🇰🇷</button>
-          <button class="flag-btn" id="flag-en" onclick="setLang('en')" style="font-size:24px;padding:6px 10px;border-radius:12px">🇬🇧</button>
+        <div style="display:flex;gap:8px">
+          <button class="flag-btn active" id="flag-uz" onclick="setLang('uz')"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f1fa-1f1ff.svg" alt="UZ"></button>
+          <button class="flag-btn" id="flag-ru" onclick="setLang('ru')"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f1f7-1f1fa.svg" alt="RU"></button>
+          <button class="flag-btn" id="flag-ko" onclick="setLang('ko')"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f1f0-1f1f7.svg" alt="KO"></button>
+          <button class="flag-btn" id="flag-en" onclick="setLang('en')"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f1ec-1f1e7.svg" alt="EN"></button>
         </div>
+      </div>
+    </div>
+    <div class="menu-section">
+      <div class="quick-actions">
+        <a class="qa-btn" href="https://t.me/tangin_admin" target="_blank" rel="noopener">
+          <span class="qa-icon">💬</span>
+          <span id="qa-admin-label">Admin</span>
+        </a>
+        <a class="qa-btn" href="https://t.me/TanginUz" target="_blank" rel="noopener">
+          <span class="qa-icon">🛍</span>
+          <span id="qa-shop-label">Tangin Shop</span>
+        </a>
+        <a class="qa-btn" href="tel:+821055091991">
+          <span class="qa-icon">📞</span>
+          <span id="qa-call-label">Qo'ng'iroq</span>
+        </a>
       </div>
     </div>
     <div class="prof-about">
@@ -401,8 +424,9 @@ const LANG = {
     fav_empty:"Sevimlilar bo'sh",fav_hint:"Mahsulot kartasidagi 🤍 ni bosing",
     search_page:"🔍 Qidiruv",search_ph:"Mahsulot nomini yozing...",
     search_empty:"Qidirish uchun yozing",search_hint:"Mahsulot nomi yoki brend",
-    profile_title:"👤 Profil",orders_menu:"📋 Buyurtmalar tarixi",
-    theme_dark:"🌙 Qora tema",theme_light:"☀️ Yoriq tema",admin:"⚙️ Admin panel",
+    profile_title:"👤 Profil",orders_menu:"Buyurtmalar tarixi",
+    theme_dark:"Qora tema",theme_light:"Yoriq tema",admin:"Admin panel",
+    qa_admin:"Admin",qa_shop:"Tangin Shop",qa_call:"Qo'ng'iroq",
     nav_home:"Bosh",nav_search:"Qidiruv",nav_fav:"Sevimlilar",nav_profile:"Profil",
     success_title:"Buyurtma qabul qilindi!",success_sub:"Tez orada bog'lanamiz.",
     no_prods:"Mahsulot topilmadi",loading:"Yuklanmoqda...",
@@ -425,8 +449,9 @@ const LANG = {
     fav_empty:"Избранное пусто",fav_hint:"Нажмите 🤍 на карточке товара",
     search_page:"🔍 Поиск",search_ph:"Введите название товара...",
     search_empty:"Введите запрос для поиска",search_hint:"Название или бренд",
-    profile_title:"👤 Профиль",orders_menu:"📋 История заказов",
-    theme_dark:"🌙 Тёмная тема",theme_light:"☀️ Светлая тема",admin:"⚙️ Администратор",
+    profile_title:"👤 Профиль",orders_menu:"История заказов",
+    theme_dark:"Тёмная тема",theme_light:"Светлая тема",admin:"Администратор",
+    qa_admin:"Админ",qa_shop:"Tangin Shop",qa_call:"Звонок",
     nav_home:"Главная",nav_search:"Поиск",nav_fav:"Избранное",nav_profile:"Профиль",
     success_title:"Заказ принят!",success_sub:"Скоро свяжемся с вами.",
     no_prods:"Товары не найдены",loading:"Загрузка...",
@@ -449,8 +474,9 @@ const LANG = {
     fav_empty:"즐겨찾기가 비어 있습니다",fav_hint:"상품 카드의 🤍를 누르세요",
     search_page:"🔍 검색",search_ph:"상품명을 입력하세요...",
     search_empty:"검색어를 입력하세요",search_hint:"상품명 또는 브랜드",
-    profile_title:"👤 프로필",orders_menu:"📋 주문 내역",
-    theme_dark:"🌙 다크 모드",theme_light:"☀️ 라이트 모드",admin:"⚙️ 관리자",
+    profile_title:"👤 프로필",orders_menu:"주문 내역",
+    theme_dark:"다크 모드",theme_light:"라이트 모드",admin:"관리자",
+    qa_admin:"관리자",qa_shop:"Tangin Shop",qa_call:"전화",
     nav_home:"홈",nav_search:"검색",nav_fav:"즐겨찾기",nav_profile:"프로필",
     success_title:"주문이 완료되었습니다!",success_sub:"@Tangin_admin이 곧 연락드립니다.",
     no_prods:"상품을 찾을 수 없습니다",loading:"로딩 중...",
@@ -473,8 +499,9 @@ const LANG = {
     fav_empty:"Favorites is empty",fav_hint:"Tap 🤍 on a product card",
     search_page:"🔍 Search",search_ph:"Type product name...",
     search_empty:"Type to search",search_hint:"Product name or brand",
-    profile_title:"👤 Profile",orders_menu:"📋 Order history",
-    theme_dark:"🌙 Dark mode",theme_light:"☀️ Light mode",admin:"⚙️ Admin panel",
+    profile_title:"👤 Profile",orders_menu:"Order history",
+    theme_dark:"Dark mode",theme_light:"Light mode",admin:"Admin panel",
+    qa_admin:"Admin",qa_shop:"Tangin Shop",qa_call:"Call",
     nav_home:"Home",nav_search:"Search",nav_fav:"Favorites",nav_profile:"Profile",
     success_title:"Order placed!",success_sub:"@Tangin_admin will contact you soon.",
     no_prods:"No products found",loading:"Loading...",
@@ -518,8 +545,11 @@ function setLang(lang) {
     'search-page-input': ['placeholder', t('search_ph')],
     'profile-page-title': ['text', t('profile_title')],
     'orders-menu-label': ['text', t('orders_menu')],
-    'theme-menu-label': ['text', t('theme_dark')],
+    'theme-menu-label': ['text', document.documentElement.getAttribute('data-theme') === 'dark' ? t('theme_light') : t('theme_dark')],
     'admin-menu-label': ['text', t('admin')],
+    'qa-admin-label': ['text', t('qa_admin')],
+    'qa-shop-label': ['text', t('qa_shop')],
+    'qa-call-label': ['text', t('qa_call')],
     'cart-close-btn': ['text', t('close_btn')],
     'orders-close-btn': ['text', t('close_btn')],
     'detail-close-btn': ['text', t('close_btn')],
@@ -568,13 +598,13 @@ function initTheme() {
   const saved = localStorage.getItem('tuz_theme') || 'light';
   setTheme(saved);
 }
-function setTheme(t) {
-  document.documentElement.setAttribute('data-theme', t);
-  localStorage.setItem('tuz_theme', t);
-  const isDark = t === 'dark';
+function setTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('tuz_theme', theme);
+  const isDark = theme === 'dark';
   document.getElementById('theme-toggle-btn').textContent = isDark ? '☀️' : '🌙';
   document.getElementById('theme-menu-icon').textContent = isDark ? '☀️' : '🌙';
-  document.getElementById('theme-menu-label').textContent = isDark ? 'Yoriq tema' : 'Qora tema';
+  document.getElementById('theme-menu-label').textContent = isDark ? t('theme_light') : t('theme_dark');
 }
 function toggleTheme() {
   const cur = document.documentElement.getAttribute('data-theme');
