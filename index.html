@@ -1002,12 +1002,20 @@ const isInTelegram = !!(tg && tg.initData);
 const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
 
 function showInstallBanner() {
-  if (isInTelegram || isStandaloneApp) return;
   const wrap = document.getElementById('pwa-install-wrap');
   if (wrap) wrap.style.display = '';
 }
 
+function hideInstallBanner() {
+  const wrap = document.getElementById('pwa-install-wrap');
+  if (wrap) wrap.style.display = 'none';
+}
+
 function installPWA() {
+  if (isInTelegram) {
+    if (tg.addToHomeScreen) tg.addToHomeScreen();
+    return;
+  }
   if (deferredInstallPrompt) {
     deferredInstallPrompt.prompt();
     deferredInstallPrompt.userChoice.finally(() => { deferredInstallPrompt = null; });
@@ -1016,20 +1024,33 @@ function installPWA() {
   }
 }
 
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredInstallPrompt = e;
-  showInstallBanner();
-});
+if (isInTelegram) {
+  // Mini App's own "Add to Home Screen" (Bot API 8.0+) — installs the mini app
+  // itself as a home-screen icon, separate from the chat-level shortcut.
+  if (tg.checkHomeScreenStatus) {
+    tg.checkHomeScreenStatus((status) => {
+      if (status === 'unsupported' || status === 'added') {
+        hideInstallBanner();
+      } else {
+        showInstallBanner();
+      }
+    });
+  }
+  if (tg.onEvent) {
+    tg.onEvent('homeScreenAdded', hideInstallBanner);
+  }
+} else if (!isStandaloneApp) {
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    showInstallBanner();
+  });
 
-window.addEventListener('appinstalled', () => {
-  deferredInstallPrompt = null;
-  const wrap = document.getElementById('pwa-install-wrap');
-  if (wrap) wrap.style.display = 'none';
-});
+  window.addEventListener('appinstalled', hideInstallBanner);
 
-if (isIOS && !isInTelegram && !isStandaloneApp) {
-  showInstallBanner();
+  if (isIOS) {
+    showInstallBanner();
+  }
 }
 </script>
 </body>
