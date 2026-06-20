@@ -614,6 +614,13 @@ const ADMIN_CHAT_ID = '6750264043';
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 
+function safeAlert(msg) {
+  if (tg && tg.showAlert) {
+    try { tg.showAlert(msg); return; } catch (e) {}
+  }
+  alert(msg);
+}
+
 let allProducts = [], allCategories = [], activeCatId = null;
 const cart = {};
 let detailProd = null, detailQty = 1;
@@ -912,7 +919,7 @@ function closePhone() { hideSheet('phone-sheet','ov3'); }
 
 async function confirmOrder() {
   const phone = document.getElementById('phone-inp').value.trim();
-  if(!phone || phone.length < 7) { alert(t('phone_err')); return; }
+  if(!phone || phone.length < 7) { safeAlert(t('phone_err')); return; }
   const btn = document.getElementById('confirm-btn');
   btn.disabled = true; btn.textContent = t('sending');
   const tgUser = tg?.initDataUnsafe?.user || {};
@@ -930,7 +937,7 @@ async function confirmOrder() {
     // Show success on home
     document.getElementById('prod-grid').innerHTML = `<div class="success-wrap"><div class="success-icon">✅</div><div class="success-title">Buyurtma qabul qilindi!</div><div class="success-sub">Tez orada <b>@Tangin_admin</b> bog'lanadi.<br>📞 ${phone}</div></div>`;
     setTimeout(()=>{ const f=activeCatId===null?allProducts:allProducts.filter(p=>p.category_id==activeCatId); renderProducts(f,'prod-grid'); }, 5000);
-  } catch(e) { alert(t('net_err')); }
+  } catch(e) { safeAlert(t('net_err')); }
   btn.disabled=false; btn.textContent='✅ Tasdiqlash va yuborish';
 }
 
@@ -1027,7 +1034,7 @@ function installPWA() {
     // open the native prompt or fire homeScreenAdded — fall back to a
     // manual hint if nothing happened after a short wait.
     homeScreenAddPending = setTimeout(() => {
-      alert(t('pwa_tg_hint'));
+      safeAlert(t('pwa_tg_hint'));
     }, 2000);
     return;
   }
