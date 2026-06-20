@@ -446,6 +446,7 @@ const LANG = {
     theme_dark:"Qora tema",theme_light:"Yoriq tema",admin:"Admin panel",
     qa_admin:"Admin",qa_shop:"Tangin Shop",qa_call:"Qo'ng'iroq",
     pwa_install:"Ilovani telefonga o'rnatish",pwa_ios_hint:"O'rnatish uchun: pastdagi \"Share\" (ulashish) tugmasini bosing, so'ng \"Add to Home Screen\" ni tanlang.",
+    pwa_tg_hint:"O'rnatish ochilmadi. Telegram ilovangizni eng so'nggi versiyaga yangilang, so'ng yana urinib ko'ring.",
     nav_home:"Bosh",nav_search:"Qidiruv",nav_fav:"Sevimlilar",nav_profile:"Profil",
     success_title:"Buyurtma qabul qilindi!",success_sub:"Tez orada bog'lanamiz.",
     no_prods:"Mahsulot topilmadi",loading:"Yuklanmoqda...",
@@ -472,6 +473,7 @@ const LANG = {
     theme_dark:"Тёмная тема",theme_light:"Светлая тема",admin:"Администратор",
     qa_admin:"Админ",qa_shop:"Tangin Shop",qa_call:"Звонок",
     pwa_install:"Установить приложение",pwa_ios_hint:"Чтобы установить: нажмите кнопку \"Share\" (поделиться) внизу, затем выберите \"Add to Home Screen\".",
+    pwa_tg_hint:"Установка не открылась. Обновите Telegram до последней версии и попробуйте снова.",
     nav_home:"Главная",nav_search:"Поиск",nav_fav:"Избранное",nav_profile:"Профиль",
     success_title:"Заказ принят!",success_sub:"Скоро свяжемся с вами.",
     no_prods:"Товары не найдены",loading:"Загрузка...",
@@ -498,6 +500,7 @@ const LANG = {
     theme_dark:"다크 모드",theme_light:"라이트 모드",admin:"관리자",
     qa_admin:"관리자",qa_shop:"Tangin Shop",qa_call:"전화",
     pwa_install:"앱을 휴대폰에 설치하기",pwa_ios_hint:"설치하려면: 아래 \"공유(Share)\" 버튼을 누른 후 \"홈 화면에 추가\"를 선택하세요.",
+    pwa_tg_hint:"설치 창이 열리지 않았습니다. Telegram 앱을 최신 버전으로 업데이트한 후 다시 시도해 주세요.",
     nav_home:"홈",nav_search:"검색",nav_fav:"즐겨찾기",nav_profile:"프로필",
     success_title:"주문이 완료되었습니다!",success_sub:"@Tangin_admin이 곧 연락드립니다.",
     no_prods:"상품을 찾을 수 없습니다",loading:"로딩 중...",
@@ -524,6 +527,7 @@ const LANG = {
     theme_dark:"Dark mode",theme_light:"Light mode",admin:"Admin panel",
     qa_admin:"Admin",qa_shop:"Tangin Shop",qa_call:"Call",
     pwa_install:"Install app to phone",pwa_ios_hint:"To install: tap the \"Share\" button below, then choose \"Add to Home Screen\".",
+    pwa_tg_hint:"Install didn't open. Please update Telegram to the latest version and try again.",
     nav_home:"Home",nav_search:"Search",nav_fav:"Favorites",nav_profile:"Profile",
     success_title:"Order placed!",success_sub:"@Tangin_admin will contact you soon.",
     no_prods:"No products found",loading:"Loading...",
@@ -1011,9 +1015,20 @@ function hideInstallBanner() {
   if (wrap) wrap.style.display = 'none';
 }
 
+let homeScreenAddPending = null;
+
 function installPWA() {
   if (isInTelegram) {
-    if (tg.addToHomeScreen) tg.addToHomeScreen();
+    clearTimeout(homeScreenAddPending);
+    try {
+      if (tg.addToHomeScreen) tg.addToHomeScreen();
+    } catch (e) {}
+    // Some Telegram client versions accept the call but never actually
+    // open the native prompt or fire homeScreenAdded — fall back to a
+    // manual hint if nothing happened after a short wait.
+    homeScreenAddPending = setTimeout(() => {
+      alert(t('pwa_tg_hint'));
+    }, 2000);
     return;
   }
   if (deferredInstallPrompt) {
@@ -1037,7 +1052,10 @@ if (isInTelegram) {
     });
   }
   if (tg.onEvent) {
-    tg.onEvent('homeScreenAdded', hideInstallBanner);
+    tg.onEvent('homeScreenAdded', () => {
+      clearTimeout(homeScreenAddPending);
+      hideInstallBanner();
+    });
   }
 } else if (!isStandaloneApp) {
   window.addEventListener('beforeinstallprompt', (e) => {
